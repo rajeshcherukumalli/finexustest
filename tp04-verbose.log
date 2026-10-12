@@ -1,0 +1,20 @@
+Error: Cannot find module 'verbose'
+Require stack:
+- /home/bhlp0121/node_modules/playwright/lib/program.js
+- /home/bhlp0121/node_modules/@playwright/test/cli.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at require.resolve (node:internal/modules/helpers:163:19)
+    at resolveReporter (/home/bhlp0121/node_modules/playwright/lib/program.js:363:18)
+    at /home/bhlp0121/node_modules/playwright/lib/program.js:324:42
+    at Array.map (<anonymous>)
+    at resolveReporterOption (/home/bhlp0121/node_modules/playwright/lib/program.js:324:30)
+    at overridesFromOptions (/home/bhlp0121/node_modules/playwright/lib/program.js:283:15)
+    at runTests (/home/bhlp0121/node_modules/playwright/lib/program.js:196:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async i.<anonymous> (/home/bhlp0121/node_modules/playwright/lib/program.js:70:7) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/bhlp0121/node_modules/playwright/lib/program.js',
+    '/home/bhlp0121/node_modules/@playwright/test/cli.js'
+  ]
+}

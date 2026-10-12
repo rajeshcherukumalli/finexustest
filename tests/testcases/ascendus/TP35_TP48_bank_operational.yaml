@@ -1,0 +1,652 @@
+test_cases:
+
+  - id: TP35
+    title: "Plaid Happy Path - Successful Bank Connection"
+    priority: P1
+    requirement_id: FR14, FR15
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify successful Plaid bank connection flow"
+
+    steps:
+      - step: "Click 'Connect Bank' button"
+        selector: "button:has-text('Connect Bank')"
+      - step: "Plaid provider window opens"
+        expected:
+          plaid_modal_shown: true
+      - step: "Enter approved sandbox identity"
+        selector: "input[name='username']"
+        input: "{{PLAID_SANDBOX_ID}}"
+      - step: "Enter sandbox password/code"
+        selector: "input[name='password']"
+        input: "{{PLAID_SANDBOX_CODE}}"
+      - step: "Login to Plaid sandbox"
+        selector: "button:has-text('Sign in')"
+      - step: "Choose bank account"
+        selector: "input[type='radio'][value='{{PLAID_ACCOUNT_ID}}']"
+      - step: "Approve data sharing consent"
+        selector: "input[type='checkbox'][name='plaid_consent']"
+      - step: "Complete Plaid flow"
+        selector: "button:has-text('Connect')"
+      - step: "Return to application"
+        expected:
+          redirected_back: true
+          bank_connection_visible: true
+
+    assertions:
+      - "Return binds linked account to application"
+      - "Correct account persists"
+      - "Bank evidence verified in approved system"
+
+  - id: TP36
+    title: "Plaid Cancel and Restart"
+    priority: P1
+    requirement_id: FR15
+    test_data_id: TD05
+    basis: Proposed
+    confirmation: "Q15"
+    description: "Verify recovery from Plaid cancellation"
+
+    scenarios:
+      - scenario: "Cancel before account selection"
+        steps:
+          - action: "Click 'Connect Bank'"
+            selector: "button:has-text('Connect Bank')"
+          - action: "Plaid modal opens"
+          - action: "Click Cancel/Close"
+            selector: "button:has-text('Close')"
+        expected:
+          returned_to_app: true
+          no_connection: true
+
+      - scenario: "Cancel after login"
+        steps:
+          - action: "Click 'Connect Bank'"
+            selector: "button:has-text('Connect Bank')"
+          - action: "Login to Plaid sandbox"
+          - action: "Click Cancel before confirming"
+            selector: "button:has-text('Cancel')"
+        expected:
+          session_cancelled: true
+
+      - scenario: "Restart connection after cancel"
+        steps:
+          - action: "Verify application data still present"
+          - action: "Click 'Connect Bank' again"
+            selector: "button:has-text('Connect Bank')"
+          - action: "Complete successful connection"
+        expected:
+          connection_state_accurate: true
+
+    assertions:
+      - "Application data remains available after cancel"
+      - "Connection state accurate"
+      - "No success inferred from cancelled session"
+
+  - id: TP37
+    title: "Plaid Timeout and Invalid Identity Handling"
+    priority: P1
+    requirement_id: FR15
+    test_data_id: TD05
+    basis: Proposed
+    confirmation: "Q15, Q19"
+    description: "Verify error handling for provider failures"
+
+    scenarios:
+      - scenario: "Plaid provider timeout"
+        steps:
+          - action: "Use configured provider failure fixture"
+            selector: "input[name='username']"
+            input: "{{PLAID_TIMEOUT_FIXTURE}}"
+          - action: "Wait for timeout"
+            wait: "{{PLAID_TIMEOUT_MS}}"
+        expected:
+          error_message_shown: true
+          useful_guidance: true
+
+      - scenario: "Invalid sandbox code/login"
+        steps:
+          - action: "Enter invalid Plaid credentials"
+            selector: "input[name='password']"
+            input: "wrongcode"
+          - action: "Attempt login"
+            selector: "button:has-text('Sign in')"
+        expected:
+          authentication_error: true
+
+      - scenario: "Retry after recovery"
+        steps:
+          - action: "Observe error/retry options"
+          - action: "Correct credentials and retry"
+        expected:
+          no_wrong_account_link: true
+          no_infinite_wait: true
+          no_duplicate_callback: true
+
+    assertions:
+      - "Useful error/retry path provided"
+      - "No wrong account linking"
+      - "No infinite wait state"
+      - "No duplicate callback side effects"
+
+  - id: TP38
+    title: "Multiple Accounts and Consent Verification"
+    priority: P1
+    requirement_id: FR15
+    test_data_id: TD05
+    basis: Proposed
+    confirmation: "Q15"
+    description: "Verify account eligibility and consent enforcement"
+
+    scenarios:
+      - scenario: "Select allowed account types"
+        steps:
+          - action: "Connect Plaid and view available accounts"
+          - action: "Verify account type filtering"
+            expected:
+              allowed_types_shown: true
+              disallowed_types_hidden: true
+
+      - scenario: "Multiple accounts selection"
+        steps:
+          - action: "If allowed, select multiple accounts"
+            selector: "input[type='checkbox'][name='account_selection']"
+          - action: "Verify only selected accounts authorized"
+        expected:
+          selected_accounts_linked: true
+
+      - scenario: "Data sharing consent"
+        steps:
+          - action: "Select different consent levels"
+            selector: "input[type='radio'][name='consent_level']"
+          - action: "Verify corresponding data access granted/restricted"
+        expected:
+          consent_policy_enforced: true
+
+    assertions:
+      - "Only authorized accounts/data linked"
+      - "Account eligibility enforced"
+      - "Consent policy enforced"
+
+  - id: TP39
+    title: "Manual Bank Statement Alternative"
+    priority: P1
+    requirement_id: FR14
+    test_data_id: TD05
+    basis: Proposed
+    confirmation: "Q14"
+    description: "Verify manual statement upload as alternative to Plaid"
+
+    steps:
+      - step: "Observe bank connection stage"
+      - step: "Verify alternate path after Q14 decision"
+      - step: "Click 'Upload Statement' option (if available)"
+        selector: "button:has-text('Upload Statement')"
+      - step: "Select approved statement file"
+        selector: "input[type='file'][name='bank_statement']"
+        input: "{{APPROVED_STATEMENT_FILE}}"
+      - step: "Verify file attached to correct application"
+      - step: "Inspect upload confirmation"
+        expected:
+          file_attached: true
+          application_linked: true
+
+    assertions:
+      - "Agreed alternate path proceeds or explains requirement"
+      - "File attaches to correct application"
+
+  - id: TP40
+    title: "Statement File Validation"
+    priority: P2
+    requirement_id: FR14
+    test_data_id: TD05
+    basis: Proposed
+    confirmation: "Q14"
+    description: "Validate file types and sizes"
+
+    scenarios:
+      - scenario: "Approved file format"
+        steps:
+          - action: "Upload approved PDF statement"
+            selector: "input[type='file'][name='bank_statement']"
+            input: "{{APPROVED_PDF_FILE}}"
+        expected:
+          accepted: true
+
+      - scenario: "Disallowed extension"
+        steps:
+          - action: "Attempt upload of .exe file"
+            selector: "input[type='file'][name='bank_statement']"
+            input: "{{MALWARE_FILE}}"
+        expected:
+          rejected: true
+          error_message: "File type not allowed"
+
+      - scenario: "Zero-byte file"
+        steps:
+          - action: "Upload empty file"
+            selector: "input[type='file'][name='bank_statement']"
+            input: "{{EMPTY_FILE}}"
+        expected:
+          rejected: true
+          error: "File is empty"
+
+      - scenario: "Over-limit file size"
+        steps:
+          - action: "Upload file exceeding size limit"
+            selector: "input[type='file'][name='bank_statement']"
+            input: "{{OVERSIZED_FILE}}"
+        expected:
+          rejected: true
+          error: "File exceeds maximum size"
+
+      - scenario: "Corrupt file"
+        steps:
+          - action: "Upload corrupted PDF"
+            selector: "input[type='file'][name='bank_statement']"
+            input: "{{CORRUPT_PDF}}"
+        expected:
+          rejected: true
+
+    assertions:
+      - "Approved limits enforced"
+      - "Error messages display correctly"
+      - "No unsafe content accepted"
+      - "No failed file accepted as valid"
+
+  - id: TP41
+    title: "Confirmation Output Capture"
+    priority: P1
+    requirement_id: FR16
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify final success page displays correct application details"
+
+    steps:
+      - step: "Observe final success page"
+        expected:
+          success_page_shown: true
+      - step: "Capture application ID"
+        selector: "span[data-testid='application_id']"
+        capture_field: true
+        expected:
+          application_id: "{{GENERATED_ID}}"
+      - step: "Capture amount"
+        selector: "span[data-testid='requested_amount']"
+        expected:
+          amount: "$25,000.00"
+      - step: "Capture status"
+        selector: "span[data-testid='application_status']"
+        expected:
+          status: "New Entered"
+      - step: "Capture purpose"
+        selector: "span[data-testid='application_purpose']"
+        expected:
+          purpose: "Renovation"
+      - step: "Capture borrower name"
+        selector: "span[data-testid='borrower_name']"
+        expected:
+          name: "{{TD01_FIRST_NAME}} {{TD01_LAST_NAME}}"
+      - step: "Capture business name"
+        selector: "span[data-testid='business_name']"
+        expected:
+          business: "{{TD01_BUSINESS_NAME}}"
+
+    assertions:
+      - "All six displayed outputs match this run"
+      - "Request $25,000.00 for TD01"
+      - "Status New Entered"
+      - "Purpose Renovation"
+
+  - id: TP42
+    title: "LOS Record Reconciliation"
+    priority: P1
+    requirement_id: FR17
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify generated application appears correctly in LOS"
+
+    steps:
+      - step: "Record generated application ID from portal"
+        capture: "{{GENERATED_ID}}"
+      - step: "Sign into LOS with approved ADMIN account"
+        url: "https://los.finexusinc.ai"
+        login:
+          username: "{{LOS_ADMIN_USERNAME}}"
+          password: "{{LOS_ADMIN_PASSWORD}}"
+      - step: "Search for generated application ID"
+        selector: "input[data-testid='application_search']"
+        input: "{{GENERATED_ID}}"
+      - step: "Open application record in LOS"
+      - step: "Verify application status: New Entered"
+        expected:
+          status: "New Entered"
+      - step: "Verify application stage: Intake"
+        expected:
+          stage: "Intake"
+      - step: "Refresh and verify consistency"
+        selector: "button[aria-label='Refresh']"
+      - step: "Compare mapped values with saved input"
+        comparison:
+          los_amount: 25000.00
+          portal_amount: 25000.00
+          los_purpose: "Renovation"
+          portal_purpose: "Renovation"
+          los_borrower: "{{TD01_FIRST_NAME}} {{TD01_LAST_NAME}}"
+          portal_borrower: "{{TD01_FIRST_NAME}} {{TD01_LAST_NAME}}"
+      - step: "Verify no duplicates from retries"
+        expected:
+          record_count: 1
+
+    assertions:
+      - "Exactly intended record reconciled"
+      - "Expected New Entered/Intake values"
+      - "All accessible inputs agree"
+      - "No duplicate records"
+
+  - id: TP43
+    title: "Back Edit and Progress Tracking"
+    priority: P2
+    requirement_id: FR18
+    test_data_id: TD04
+    basis: Proposed
+    confirmation: "Q17"
+    description: "Verify form state preservation during backward navigation"
+
+    steps:
+      - step: "Navigate to Summary stage"
+      - step: "Click Back to return to previous stage"
+        selector: "button:has-text('Back')"
+      - step: "Edit one field (e.g., phone number)"
+        selector: "input[name='phone']"
+        input: "{{NEW_PHONE}}"
+      - step: "Click Next to move forward"
+        selector: "button:has-text('Next')"
+      - step: "Inspect Summary for updated value"
+        expected:
+          phone_updated: "{{NEW_PHONE}}"
+      - step: "Verify completion percentage"
+        selector: "div[data-testid='progress_indicator']"
+        expected:
+          progress_accurate: true
+
+    assertions:
+      - "No lost edits during backward navigation"
+      - "No stale conditional values"
+      - "Completion percentage follows approved stage configuration"
+
+  - id: TP44
+    title: "Form Refresh and Resume Functionality"
+    priority: P1
+    requirement_id: FR18
+    test_data_id: TD06
+    basis: Proposed
+    confirmation: "Q17, Q18"
+    description: "Verify form state persistence across refresh and browser reopen"
+
+    scenarios:
+      - scenario: "Refresh at terms stage"
+        steps:
+          - action: "Navigate to terms stage"
+          - action: "Fill all fields before this stage"
+          - action: "Refresh page"
+            key: "F5"
+          - action: "Verify can resume from same stage"
+            expected:
+              same_stage: true
+              data_retained: true
+
+      - scenario: "Refresh at income stage"
+        steps:
+          - action: "Navigate to income information stage"
+          - action: "Refresh page"
+            key: "F5"
+          - action: "Verify form state preserved"
+            expected:
+              all_fields_retained: true
+
+      - scenario: "Refresh at bank return stage"
+        steps:
+          - action: "Return from Plaid connection"
+          - action: "Refresh page before completing second OTP"
+            key: "F5"
+          - action: "Verify application state consistent"
+        expected:
+          bank_link_retained: true
+
+      - scenario: "Close browser and resume"
+        steps:
+          - action: "Navigate to mid-journey stage"
+          - action: "Close browser/tab entirely"
+          - action: "Reopen approved resume route/link"
+            url: "{{RESUME_URL}}"
+          - action: "Verify return to same stage"
+            expected:
+              same_stage: true
+              data_available: true
+
+      - scenario: "Cannot resume another application"
+        steps:
+          - action: "Obtain resume URL for application A"
+          - action: "Open resume URL for different application ID"
+            url: "{{DIFFERENT_APP_RESUME_URL}}"
+          - action: "Verify unauthorized access prevented"
+            expected:
+              access_denied: true
+
+    assertions:
+      - "Agreed persistence/authentication applies"
+      - "Applicant cannot accidentally resume another application"
+
+  - id: TP45
+    title: "Applicant and LOS Access Isolation"
+    priority: P1
+    requirement_id: NFR01
+    test_data_id: TD07
+    basis: Proposed
+    confirmation: "Q18"
+    description: "Verify access controls and data isolation"
+
+    steps:
+      - step: "Start first applicant session and record application ID A"
+      - step: "Start second independent applicant session"
+      - step: "Attempt to access Application A from session 2"
+        url: "{{APP_A_URL}}"
+      - step: "Verify unauthorized application ID access blocked"
+        expected:
+          access_denied: true
+      - step: "Sign into LOS with lower-privilege account (not ADMIN)"
+      - step: "Attempt to access Application A data"
+        expected:
+          limited_data: true
+          sensitive_data_hidden: true
+      - step: "Verify role/session policy applied"
+        expected:
+          role_enforced: true
+
+    assertions:
+      - "Unauthorized application/identity/bank data not returned"
+      - "Role/session policy applied correctly"
+
+  - id: TP46
+    title: "Data Masking and Evidence Redaction"
+    priority: P1
+    requirement_id: NFR01
+    test_data_id: TD07
+    basis: Observed
+    confirmation: "Q18"
+    description: "Verify sensitive data visibility and redaction"
+
+    steps:
+      - step: "Inspect portal Summary for SSN masking"
+        selector: "span[data-testid='ssn_display']"
+        expected:
+          format: "XXX-XX-{{LAST_4_SSN}}"
+      - step: "Inspect LOS for SSN visibility control"
+      - step: "Check browser URL for sensitive data"
+        expected:
+          no_ssn_in_url: true
+          no_otp_in_url: true
+          no_credentials_in_url: true
+      - step: "Review browser history"
+        expected:
+          no_sensitive_urls: true
+      - step: "Check approved logs for redaction"
+      - step: "Verify SSN, OTP, bank credentials redacted"
+        expected:
+          logs_redacted: true
+      - step: "Review Plaid return URL for email exposure"
+        expected:
+          email_not_in_url: true
+
+    assertions:
+      - "Sensitive data visibility follows approved policy"
+      - "Logs/evidence redact SSN, OTP, bank credentials"
+      - "Email not exposed in return URL"
+
+  - id: TP47
+    title: "Service Failure and Performance Testing"
+    priority: P1
+    requirement_id: NFR02
+    test_data_id: TD06
+    basis: Proposed
+    confirmation: "Q19"
+    description: "Verify resilience and performance under failures"
+
+    scenarios:
+      - scenario: "Measure stage transition times"
+        steps:
+          - action: "Record timestamp at each stage entry"
+          - action: "Measure time to next stage"
+          - action: "Verify against agreed SLA"
+            expected:
+              within_target: true
+
+      - scenario: "Email service outage"
+        steps:
+          - action: "Simulate email provider unavailable"
+          - action: "Attempt OTP request"
+            selector: "button:has-text('Send Code')"
+          - action: "Observe error handling"
+            expected:
+              error_message: true
+              not_misleading: true
+
+      - scenario: "Address lookup service down"
+        steps:
+          - action: "Simulate address provider unavailable"
+          - action: "Attempt address lookup"
+          - action: "Verify fallback or clear error"
+            expected:
+              graceful_failure: true
+
+      - scenario: "Bank connection timeout"
+        steps:
+          - action: "Simulate Plaid timeout"
+          - action: "Wait for timeout error"
+          - action: "Verify retry path available"
+            expected:
+              retry_option: true
+
+      - scenario: "Backend/API outage"
+        steps:
+          - action: "Simulate API service unavailable"
+          - action: "Attempt form submission"
+          - action: "Observe error response"
+            expected:
+              no_duplicate_creation: true
+              error_clear: true
+
+    assertions:
+      - "No misleading success on failure"
+      - "No duplicate records created"
+      - "Recovery and response times meet agreed targets"
+
+  - id: TP48
+    title: "Browser and Keyboard Accessibility Coverage"
+    priority: P2
+    requirement_id: FR01-FR18
+    test_data_id: TD01
+    basis: Proposed
+    confirmation: "Q01, Q17"
+    description: "Verify cross-browser and keyboard accessibility"
+
+    scenarios:
+      - scenario: "Chrome browser"
+        steps:
+          - action: "Run smoke test on Chrome {{CHROME_VERSION}}"
+          - action: "Verify flow usable"
+            expected:
+              no_errors: true
+
+      - scenario: "Edge browser"
+        steps:
+          - action: "Run smoke test on Edge {{EDGE_VERSION}}"
+          - action: "Verify flow usable"
+            expected:
+              no_errors: true
+
+      - scenario: "Firefox browser"
+        steps:
+          - action: "Run smoke test on Firefox {{FIREFOX_VERSION}}"
+          - action: "Verify flow usable"
+            expected:
+              no_errors: true
+
+      - scenario: "Tab order verification"
+        steps:
+          - action: "Navigate form using Tab key only"
+            key: "Tab"
+          - action: "Verify logical tab order"
+            expected:
+              order_logical: true
+              no_hidden_controls: true
+
+      - scenario: "Dropdown keyboard navigation"
+        steps:
+          - action: "Open dropdown using Space/Enter"
+            key: "Space"
+          - action: "Navigate options using Arrow keys"
+            key: "ArrowDown"
+          - action: "Select using Enter"
+            key: "Return"
+            expected:
+              accessible: true
+
+      - scenario: "OTP field paste and focus"
+        steps:
+          - action: "Copy OTP code to clipboard"
+          - action: "Focus OTP input field"
+            selector: "input[name='verification_code']"
+          - action: "Paste code"
+            key: "Ctrl+V"
+          - action: "Verify code pasted correctly"
+            expected:
+              pasted: true
+              focused: true
+
+      - scenario: "Error message focus"
+        steps:
+          - action: "Trigger validation error"
+          - action: "Verify focus moves to error"
+            expected:
+              focused: true
+
+      - scenario: "Viewport responsiveness"
+        steps:
+          - action: "Test on viewport: 375px (mobile)"
+          - action: "Test on viewport: 1024px (tablet)"
+          - action: "Test on viewport: 1920px (desktop)"
+          - action: "Verify layout responsive"
+            expected:
+              all_viewports_usable: true
+
+    assertions:
+      - "Flow remains usable across browsers"
+      - "No hidden required controls"
+      - "Tab order logical and accessible"
+      - "Dropdowns keyboard navigable"
+      - "OTP paste/focus works correctly"
+      - "Errors focused for accessibility"
+      - "Responsive design across viewports"
+      - "Agreed accessibility/browser requirements satisfied"

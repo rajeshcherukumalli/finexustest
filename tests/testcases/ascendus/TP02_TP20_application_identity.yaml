@@ -1,0 +1,801 @@
+test_cases:
+
+  - id: TP02
+    title: "Entry Validation - Mandatory Field Requirements"
+    priority: P1
+    requirement_id: FR01
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q01"
+    description: "Validate that mandatory fields cannot be left blank and display field-specific validation messages"
+
+    scenarios:
+      - scenario: "Blank amount field"
+        steps:
+          - action: "Leave amount field empty"
+            selector: "input[name='amount']"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          message: "Field-specific validation error displayed"
+          field_error: true
+          progression_blocked: true
+
+      - scenario: "Blank state selection"
+        steps:
+          - action: "Leave state dropdown empty"
+            selector: "select[name='state']"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          message: "Select a state"
+          field_error: true
+
+      - scenario: "Malformed email"
+        steps:
+          - action: "Enter invalid email format"
+            selector: "input[name='email']"
+            input: "notanemail"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          message: "Please enter a valid email address"
+          field_error: true
+
+      - scenario: "Initial agreement not checked"
+        steps:
+          - action: "Leave initial agreement checkbox unchecked"
+            selector: "input[name='initial_agreement']"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          message: "You must agree to proceed"
+          field_error: true
+
+    assertions:
+      - "No progression without required fields"
+      - "Field-specific error messages displayed"
+      - "Form state preserved after validation error"
+
+  - id: TP03
+    title: "Amount and State Boundaries"
+    priority: P2
+    requirement_id: FR01
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q01"
+    description: "Test approved minimum/maximum amounts and supported/unsupported state configurations"
+
+    scenarios:
+      - scenario: "Minimum amount allowed"
+        steps:
+          - action: "Enter minimum approved amount"
+            selector: "input[name='amount']"
+            input: "{{MIN_AMOUNT}}"
+          - action: "Verify accepted"
+            selector: "button:has-text('Next')"
+        expected:
+          accepted: true
+
+      - scenario: "Maximum amount allowed"
+        steps:
+          - action: "Enter maximum approved amount"
+            selector: "input[name='amount']"
+            input: "{{MAX_AMOUNT}}"
+          - action: "Verify accepted"
+            selector: "button:has-text('Next')"
+        expected:
+          accepted: true
+
+      - scenario: "Amount below minimum"
+        steps:
+          - action: "Enter amount below minimum"
+            selector: "input[name='amount']"
+            input: "{{MIN_AMOUNT - 1}}"
+        expected:
+          validation_error: true
+          message: "Amount must be at least {{MIN_AMOUNT}}"
+
+      - scenario: "Amount above maximum"
+        steps:
+          - action: "Enter amount above maximum"
+            selector: "input[name='amount']"
+            input: "{{MAX_AMOUNT + 1}}"
+        expected:
+          validation_error: true
+          message: "Amount cannot exceed {{MAX_AMOUNT}}"
+
+      - scenario: "Supported states"
+        steps:
+          - action: "Select each supported state from dropdown"
+            selector: "select[name='state']"
+          - action: "Verify each is selectable"
+        expected:
+          all_supported_states_available: true
+
+      - scenario: "Unsupported states not shown"
+        steps:
+          - action: "Open state dropdown"
+            selector: "select[name='state']"
+          - action: "Verify unsupported states absent"
+        expected:
+          unsupported_states_hidden: true
+
+    assertions:
+      - "Amount format consistent in Summary and confirmation"
+      - "Product rules applied correctly"
+      - "Only supported states available for selection"
+
+  - id: TP04
+    title: "First Valid Email Code Verification"
+    priority: P1
+    requirement_id: FR02
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify that current six-digit email code advances applicant correctly"
+
+    steps:
+      - step: "Request verification code for fresh mailbox"
+        input: "Fresh QA email: {{QA_EMAIL}}"
+      - step: "Retrieve code from email"
+        expected: "Six-digit code received within {{OTP_TIMEOUT_MS}}ms"
+        capture_code: true
+      - step: "Enter code in verification modal"
+        selector: "input[name='verification_code']"
+        input: "{{CURRENT_OTP}}"
+      - step: "Click Verify"
+        selector: "button:has-text('Verify')"
+
+    assertions:
+      - "Applicant advances to Details stage"
+      - "Verification applies to entered mailbox only"
+      - "Code not visible in permanent evidence"
+
+  - id: TP05
+    title: "Email Code Validation - Wrong, Incomplete, Expired"
+    priority: P1
+    requirement_id: FR02
+    test_data_id: TD03
+    basis: Proposed
+    confirmation: "Q02"
+    description: "Validate rejection of invalid, incomplete, and expired codes"
+
+    scenarios:
+      - scenario: "Wrong code"
+        steps:
+          - action: "Enter incorrect six-digit code"
+            selector: "input[name='verification_code']"
+            input: "000000"
+          - action: "Click Verify"
+            selector: "button:has-text('Verify')"
+        expected:
+          error_message: "Invalid verification code"
+          progression_blocked: true
+
+      - scenario: "Incomplete code (< 6 digits)"
+        steps:
+          - action: "Enter only 4 digits"
+            selector: "input[name='verification_code']"
+            input: "1234"
+          - action: "Click Verify"
+            selector: "button:has-text('Verify')"
+        expected:
+          error_message: "Code must be 6 digits"
+          progression_blocked: true
+
+      - scenario: "Expired code (> 15 minutes old)"
+        steps:
+          - action: "Use code older than {{OTP_EXPIRY_MINUTES}} minutes"
+            selector: "input[name='verification_code']"
+            input: "{{EXPIRED_OTP}}"
+          - action: "Click Verify"
+            selector: "button:has-text('Verify')"
+        expected:
+          error_message: "Code has expired"
+          progression_blocked: true
+
+    assertions:
+      - "No advancement for invalid code"
+      - "Expiry clock matches UI countdown"
+      - "Exact validation messages match approved specification"
+
+  - id: TP06
+    title: "Email Code Resend and Reuse Rules"
+    priority: P1
+    requirement_id: FR02
+    test_data_id: TD03
+    basis: Proposed
+    confirmation: "Q02"
+    description: "Verify code resend countdown and code invalidation after use or resend"
+
+    scenarios:
+      - scenario: "Resend during countdown disabled"
+        steps:
+          - action: "Request code"
+          - action: "Attempt Resend before countdown expires"
+            selector: "button:has-text('Resend Code')"
+        expected:
+          resend_button_disabled: true
+          countdown_visible: true
+
+      - scenario: "Resend after countdown expires"
+        steps:
+          - action: "Wait for countdown to complete"
+            wait: "{{RESEND_COUNTDOWN_SECONDS}}"
+          - action: "Click Resend Code"
+            selector: "button:has-text('Resend Code')"
+        expected:
+          new_code_sent: true
+
+      - scenario: "Prior code invalid after resend"
+        steps:
+          - action: "Capture first code: {{FIRST_CODE}}"
+          - action: "Click Resend Code"
+            selector: "button:has-text('Resend Code')"
+          - action: "Attempt to use first code"
+            selector: "input[name='verification_code']"
+            input: "{{FIRST_CODE}}"
+          - action: "Click Verify"
+            selector: "button:has-text('Verify')"
+        expected:
+          error_message: "Code has expired or is invalid"
+          progression_blocked: true
+
+      - scenario: "Code invalid after successful use"
+        steps:
+          - action: "Use code successfully: {{USED_CODE}}"
+          - action: "Go back to verification screen"
+          - action: "Attempt to reuse same code"
+            selector: "input[name='verification_code']"
+            input: "{{USED_CODE}}"
+          - action: "Click Verify"
+            selector: "button:has-text('Verify')"
+        expected:
+          error_message: "Code has already been used"
+          progression_blocked: true
+
+    assertions:
+      - "Countdown state matches UI display"
+      - "Resend works when enabled"
+      - "Code invalidation follows approved rule"
+
+  - id: TP07
+    title: "Second Email Verification Checkpoint"
+    priority: P1
+    requirement_id: FR02
+    test_data_id: TD01
+    basis: Observed
+    confirmation: "Q02"
+    description: "Verify second OTP checkpoint after bank connection"
+
+    steps:
+      - step: "Complete application through bank connection stage"
+      - step: "Observe second OTP prompt after bank return"
+        expected: "Second email OTP modal appears"
+      - step: "Retrieve newly issued code from {{QA_EMAIL}}"
+      - step: "Enter second OTP code"
+        selector: "input[name='final_verification_code']"
+        input: "{{SECOND_OTP}}"
+      - step: "Click Verify"
+        selector: "button:has-text('Verify')"
+
+    assertions:
+      - "Second checkpoint retains all application data"
+      - "Final success page appears after verification"
+      - "Leads to successful outcome for recorded path"
+
+  - id: TP08
+    title: "Applicant Summary Persistence"
+    priority: P1
+    requirement_id: FR03
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify applicant details persist in Summary after navigation"
+
+    steps:
+      - step: "Enter applicant details"
+        data:
+          first_name: "{{TD01_FIRST_NAME}}"
+          last_name: "{{TD01_LAST_NAME}}"
+          language: "English"
+          phone: "+1-555-0123"
+      - step: "Navigate to Summary"
+        selector: "button[data-testid='view_summary']"
+      - step: "Verify all details displayed correctly"
+        expected:
+          first_name_displayed: "{{TD01_FIRST_NAME}}"
+          last_name_displayed: "{{TD01_LAST_NAME}}"
+          language_displayed: "English"
+          phone_formatted: "+1 (555) 0123"
+      - step: "Navigate Back"
+        selector: "button:has-text('Back')"
+      - step: "Navigate forward again"
+        selector: "button:has-text('Next')"
+      - step: "Verify Summary retains saved values"
+        expected:
+          no_stale_values: true
+          all_values_preserved: true
+
+    assertions:
+      - "Summary reflects saved first/last name"
+      - "Language setting preserved"
+      - "Phone formatted and preserved correctly"
+      - "No stale values after navigation"
+
+  - id: TP09
+    title: "Community Organization Referral Branch"
+    priority: P2
+    requirement_id: FR03
+    test_data_id: TD01
+    basis: Observed
+    confirmation: "Q03"
+    description: "Verify conditional referral selection and cascading organization/referrer fields"
+
+    steps:
+      - step: "Select referral source: Community Organization"
+        selector: "select[name='referral_source']"
+        input: "Community Organization"
+      - step: "Verify organisation dropdown populated"
+        selector: "select[name='organisation']"
+        expected:
+          options_available: true
+      - step: "Select configured organisation"
+        selector: "select[name='organisation']"
+        input: "{{QA_ORGANIZATION}}"
+      - step: "Verify referrer dropdown populated based on organisation"
+        selector: "select[name='referrer']"
+        expected:
+          options_filtered: true
+      - step: "Select referrer"
+        selector: "select[name='referrer']"
+        input: "{{QA_REFERRER}}"
+      - step: "Change referral source to different option"
+        selector: "select[name='referral_source']"
+        input: "Self"
+      - step: "Verify organisation/referrer cleared or hidden"
+        expected:
+          stale_selection_removed: true
+
+    assertions:
+      - "Dependent selections follow configured source"
+      - "Summary reflects selected source, organisation, referrer"
+      - "Stale values removed when source changes"
+
+  - id: TP10
+    title: "Language, Phone, and Name Variations"
+    priority: P2
+    requirement_id: FR03
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q01, Q03"
+    description: "Test language support, phone formatting, and name character limits"
+
+    scenarios:
+      - scenario: "Each configured language"
+        steps:
+          - action: "Test each available language"
+            selector: "select[name='language']"
+          - action: "Verify language-specific validation rules applied"
+        expected:
+          all_languages_supported: true
+
+      - scenario: "Valid phone formatting"
+        steps:
+          - action: "Enter phone: (555) 123-4567"
+            selector: "input[name='phone']"
+            input: "(555) 123-4567"
+        expected:
+          formatted_as: "+1-555-123-4567"
+          accepted: true
+
+      - scenario: "Invalid phone digits"
+        steps:
+          - action: "Enter phone with invalid characters"
+            selector: "input[name='phone']"
+            input: "555-abc-defg"
+        expected:
+          validation_error: true
+
+      - scenario: "Supported name punctuation"
+        steps:
+          - action: "Enter name with apostrophe and hyphen"
+            selector: "input[name='first_name']"
+            input: "Jean-Marie"
+          - action: "Verify accepted"
+        expected:
+          accepted: true
+
+      - scenario: "Maximum name length"
+        steps:
+          - action: "Enter name at maximum length"
+            selector: "input[name='last_name']"
+            input: "{{MAX_NAME_LENGTH_STRING}}"
+        expected:
+          accepted: true
+
+      - scenario: "Name exceeds maximum"
+        steps:
+          - action: "Attempt to enter name exceeding limit"
+            selector: "input[name='last_name']"
+            input: "{{EXCEEDS_MAX_NAME_LENGTH_STRING}}"
+        expected:
+          truncated: true
+
+    assertions:
+      - "Accepted values match approved formats"
+      - "Invalid values display explanatory message"
+      - "Name values preserved across navigation"
+
+  - id: TP11
+    title: "Business Details and Catalogues"
+    priority: P1
+    requirement_id: FR04
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify business structure, industry, and catalogue selections"
+
+    steps:
+      - step: "Enter business legal name"
+        selector: "input[name='business_legal_name']"
+        input: "{{TD01_BUSINESS_NAME}}"
+      - step: "Select business structure: General Partnership"
+        selector: "select[name='business_structure']"
+        input: "General Partnership"
+      - step: "Select industry: Retail Trade"
+        selector: "select[name='industry']"
+        input: "Retail Trade"
+      - step: "Verify sub-industry dropdown populated"
+        selector: "select[name='sub_industry']"
+        expected:
+          options_shown: true
+      - step: "Select sub-industry from displayed options"
+        selector: "select[name='sub_industry']"
+        input: "{{QA_RETAIL_SUBINDUSTRY}}"
+      - step: "Enter start date (past date)"
+        selector: "input[name='start_date']"
+        input: "{{TD01_START_DATE}}"
+      - step: "Enter EIN"
+        selector: "input[name='ein']"
+        input: "{{TD01_EIN}}"
+      - step: "Select business address"
+        selector: "input[name='business_address']"
+        input: "{{TD01_BUSINESS_ADDRESS}}"
+
+    assertions:
+      - "All selections persist in Summary"
+      - "Catalogue options display correctly"
+      - "Business identity values map to LOS fields"
+
+  - id: TP12
+    title: "Industry Change and Sub-Industry Dependency"
+    priority: P2
+    requirement_id: FR04
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q04"
+    description: "Verify sub-industry list updates when industry changes"
+
+    steps:
+      - step: "Select initial industry: Retail Trade"
+        selector: "select[name='industry']"
+        input: "Retail Trade"
+      - step: "Select sub-industry from Retail options"
+        selector: "select[name='sub_industry']"
+        input: "{{RETAIL_SUBINDUSTRY}}"
+      - step: "Change industry to: Manufacturing"
+        selector: "select[name='industry']"
+        input: "Manufacturing"
+      - step: "Verify sub-industry list updated for Manufacturing"
+        selector: "select[name='sub_industry']"
+        expected:
+          options_changed: true
+          previous_selection_removed: true
+
+    assertions:
+      - "Sub-industry list follows approved dependency"
+      - "Incompatible value not silently submitted"
+
+  - id: TP13
+    title: "Business and Home Address Lookup"
+    priority: P1
+    requirement_id: FR04, FR05
+    test_data_id: TD01
+    basis: Observed
+    confirmation: "Q04"
+    description: "Verify address lookup and selection for business and home locations"
+
+    scenarios:
+      - scenario: "Business address lookup"
+        steps:
+          - action: "Enter partial business address"
+            selector: "input[name='business_address']"
+            input: "{{PARTIAL_BUSINESS_ADDRESS}}"
+          - action: "Verify address suggestions displayed"
+            expected:
+              suggestions_shown: true
+          - action: "Select approved address result"
+            selector: "button[data-address='{{TD01_BUSINESS_ADDRESS_ID}}']"
+          - action: "Inspect all address components"
+            expected:
+              street: "{{TD01_BUSINESS_STREET}}"
+              city: "{{TD01_BUSINESS_CITY}}"
+              state: "{{TD01_BUSINESS_STATE}}"
+              postal: "{{TD01_BUSINESS_ZIP}}"
+              country: "US"
+
+      - scenario: "Home address lookup"
+        steps:
+          - action: "Enter partial home address"
+            selector: "input[name='home_address']"
+            input: "{{PARTIAL_HOME_ADDRESS}}"
+          - action: "Select approved address result"
+          - action: "Inspect components in Summary"
+            expected:
+              final_los_data_matches: true
+
+    assertions:
+      - "Selected components agree with result"
+      - "Final LOS data matches selection"
+      - "Manual edits follow approved policy"
+
+  - id: TP14
+    title: "Address Provider Failure Handling"
+    priority: P2
+    requirement_id: FR04, FR05
+    test_data_id: TD06
+    basis: Proposed
+    confirmation: "Q04"
+    description: "Verify handling of address lookup failures and timeouts"
+
+    scenarios:
+      - scenario: "Empty/no-match result"
+        steps:
+          - action: "Search for address with no matches"
+            selector: "input[name='business_address']"
+            input: "{{NONEXISTENT_ADDRESS}}"
+          - action: "Observe no results"
+            expected:
+              no_suggestions: true
+          - action: "Attempt manual completion if enabled"
+            selector: "button:has-text('Enter Manually')"
+        expected:
+          fallback_available: true
+
+      - scenario: "Address lookup timeout"
+        steps:
+          - action: "Trigger controlled address lookup timeout"
+            selector: "input[name='business_address']"
+            input: "{{TIMEOUT_TRIGGER_ADDRESS}}"
+          - action: "Wait for timeout"
+            wait: "{{ADDRESS_LOOKUP_TIMEOUT_MS}}"
+        expected:
+          error_shown: true
+          form_data_retained: true
+
+    assertions:
+      - "No unrelated address populated"
+      - "Form data preserved on failure"
+      - "Fallback matches approved policy"
+
+  - id: TP15
+    title: "Business Date and EIN Validation"
+    priority: P1
+    requirement_id: FR04
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q04"
+    description: "Validate start date and EIN requirements"
+
+    scenarios:
+      - scenario: "Future start date rejected"
+        steps:
+          - action: "Enter future date for start_date"
+            selector: "input[name='start_date']"
+            input: "{{FUTURE_DATE}}"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          error: "Start date cannot be in the future"
+
+      - scenario: "Invalid date format rejected"
+        steps:
+          - action: "Enter malformed date"
+            selector: "input[name='start_date']"
+            input: "13/45/2099"
+        expected:
+          error: "Please enter a valid date"
+
+      - scenario: "Malformed EIN rejected"
+        steps:
+          - action: "Enter invalid EIN format"
+            selector: "input[name='ein']"
+            input: "00-000-0000"
+        expected:
+          validation_error: true
+
+      - scenario: "Duplicate EIN detected"
+        steps:
+          - action: "Enter previously used EIN"
+            selector: "input[name='ein']"
+            input: "{{EXISTING_EIN}}"
+        expected:
+          error: "This EIN is already registered"
+          uniqueness_enforced: true
+
+    assertions:
+      - "No invalid date conversion"
+      - "No silent data corruption"
+      - "Uniqueness enforced after Q04 approval"
+
+  - id: TP16
+    title: "Birth Date and SSN Handling"
+    priority: P1
+    requirement_id: FR05
+    test_data_id: TD01, TD02
+    basis: Observed
+    confirmation: "Q05"
+    description: "Verify DOB and SSN validation and masking"
+
+    scenarios:
+      - scenario: "Valid DOB and SSN"
+        steps:
+          - action: "Enter approved DOB"
+            selector: "input[name='dob']"
+            input: "{{TD01_DOB}}"
+          - action: "Enter approved SSN"
+            selector: "input[name='ssn']"
+            input: "{{TD01_SSN}}"
+          - action: "Verify masked in Summary"
+            expected:
+              ssn_masked: "XXX-XX-{{LAST_4_SSN}}"
+              dob_visible: true
+
+      - scenario: "Invalid date of birth"
+        steps:
+          - action: "Enter invalid DOB"
+            selector: "input[name='dob']"
+            input: "13/32/2050"
+        expected:
+          error: "Please enter a valid date"
+
+      - scenario: "Under-age applicant"
+        steps:
+          - action: "Enter DOB indicating age < 18"
+            selector: "input[name='dob']"
+            input: "{{UNDERAGE_DOB}}"
+        expected:
+          error: "Applicant must be at least 18 years old"
+
+      - scenario: "Malformed SSN"
+        steps:
+          - action: "Enter malformed SSN"
+            selector: "input[name='ssn']"
+            input: "000-00-0000"
+        expected:
+          validation_error: true
+
+    assertions:
+      - "Valid identity persists with masked Summary"
+      - "Invalid identity follows approved policy"
+      - "No misleading success on invalid input"
+
+  - id: TP17
+    title: "Citizenship and Program Dependency"
+    priority: P1
+    requirement_id: FR05
+    test_data_id: TD04
+    basis: Observed
+    confirmation: "Q05"
+    description: "Verify citizenship selection and SBA program restrictions"
+
+    steps:
+      - step: "Select citizenship: Yes"
+        selector: "select[name='citizenship']"
+        input: "Yes"
+      - step: "Verify SBA program available"
+        selector: "select[name='program']"
+        expected:
+          sba_option_shown: true
+      - step: "Select citizenship: No"
+        selector: "select[name='citizenship']"
+        input: "No"
+      - step: "Verify SBA program not available or restricted"
+        selector: "select[name='program']"
+        expected:
+          sba_restricted: true
+      - step: "Test configured SBA program fixtures"
+        selector: "select[name='program']"
+        input: "{{QA_SBA_PROGRAM}}"
+
+    assertions:
+      - "No can progress in demonstrated configuration"
+      - "SBA restriction follows approved program rule"
+
+  - id: TP18
+    title: "Terms Review and Consent Gate"
+    priority: P1
+    requirement_id: FR06
+    test_data_id: TD01, TD02
+    basis: Observed
+    confirmation: "Q06"
+    description: "Verify policy links and consent requirements"
+
+    steps:
+      - step: "Open policy links"
+        selector: "a[data-testid='policy_link']"
+      - step: "Verify links resolve to correct policy documents"
+        expected:
+          links_functional: true
+      - step: "Return to consent form"
+      - step: "Scroll through terms"
+      - step: "Attempt submission without acceptance"
+        selector: "button:has-text('Submit')"
+        expected:
+          progression_blocked: true
+          error: "You must accept the terms to continue"
+      - step: "Check consent checkbox"
+        selector: "input[type='checkbox'][name='accept_terms']"
+      - step: "Click Submit"
+        selector: "button:has-text('Submit')"
+
+    assertions:
+      - "Links work and open policy documents"
+      - "Consent gate prevents progression without acceptance"
+      - "Consent record follows approved rules"
+      - "Accepted path reaches Additional Details stage"
+
+  - id: TP19
+    title: "ECDUP01 Recovery - Identity Duplicate Detection"
+    priority: P1
+    requirement_id: FR07
+    test_data_id: TD06
+    basis: Observed
+    confirmation: "Q07"
+    description: "Verify handling of duplicate SSN/identity errors"
+
+    steps:
+      - step: "Submit application with confirmed ECDUP01 error fixture"
+        selector: "button:has-text('Submit')"
+      - step: "Observe error dialog/toast with support guidance"
+        expected:
+          error_dialog_shown: true
+          message_contains: "duplicate"
+      - step: "Click Continue to recover"
+        selector: "button:has-text('Continue')"
+      - step: "Correct identity field"
+        selector: "input[name='ssn']"
+        input: "{{CORRECTED_SSN}}"
+      - step: "Retry submission"
+        selector: "button:has-text('Submit')"
+
+    assertions:
+      - "Error identifies failure with support guidance"
+      - "Retry preserves form data"
+      - "Yields agreed record state without unintended duplicates"
+
+  - id: TP20
+    title: "Repeated Intermediate Submission - Duplicate Prevention"
+    priority: P1
+    requirement_id: FR06, NFR02
+    test_data_id: TD06
+    basis: Proposed
+    confirmation: "Q06, Q19"
+    description: "Verify idempotency of form submission and duplicate prevention"
+
+    steps:
+      - step: "Fill complete form with TD06 data"
+      - step: "Double-click Submit button rapidly"
+        selector: "button:has-text('Submit')"
+      - step: "Verify only one submission processed"
+        expected:
+          single_submission: true
+      - step: "Retry after response timeout (simulated network delay)"
+        wait: "{{NETWORK_TIMEOUT}}"
+      - step: "Verify no duplicate records created"
+        expected:
+          duplicates: 0
+
+    assertions:
+      - "No unintended duplicate records created"
+      - "Final save state reconciles with LOS"
+      - "Retry policy follows approved specification"

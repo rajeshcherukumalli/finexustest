@@ -1,0 +1,595 @@
+test_cases:
+
+  - id: TP21
+    title: "Ownership Percentage and Address Selection"
+    priority: P1
+    requirement_id: FR08
+    test_data_id: TD01, TD04
+    basis: Observed
+    confirmation: "Q08"
+    description: "Verify ownership entry and same-address choice with home address editing"
+
+    steps:
+      - step: "Enter ownership percentage: 90%"
+        selector: "input[name='ownership_percent']"
+        input: 90
+      - step: "Verify accepted in Summary"
+        expected:
+          ownership_shown: "90%"
+      - step: "Toggle same-address: On"
+        selector: "input[name='same_address'][value='true']"
+      - step: "Verify business address copied to home"
+        expected:
+          home_address_matches_business: true
+      - step: "Toggle same-address: Off"
+        selector: "input[name='same_address'][value='false']"
+      - step: "Edit home address to different location"
+        selector: "input[name='home_address']"
+        input: "{{DIFFERENT_HOME_ADDRESS}}"
+      - step: "Verify both addresses independent in Summary"
+        expected:
+          business_address: "{{TD01_BUSINESS_ADDRESS}}"
+          home_address: "{{DIFFERENT_HOME_ADDRESS}}"
+
+    assertions:
+      - "Summary reflects ownership choice"
+      - "Copied address behavior matches approved policy"
+      - "Ownership limits checked separately"
+
+  - id: TP22
+    title: "Optional Business Contact and Preferences"
+    priority: P2
+    requirement_id: FR08
+    test_data_id: TD04
+    basis: Observed
+    confirmation: "Q08"
+    description: "Verify optional fields remain usable and preferences persist"
+
+    scenarios:
+      - scenario: "Optional business phone blank"
+        steps:
+          - action: "Leave business phone empty"
+            selector: "input[name='business_phone']"
+          - action: "Fill other optional fields"
+            selector: "input[name='website']"
+            input: "{{TD01_WEBSITE}}"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          progression_allowed: true
+
+      - scenario: "Business phone populated"
+        steps:
+          - action: "Enter business phone"
+            selector: "input[name='business_phone']"
+            input: "{{BUSINESS_PHONE}}"
+          - action: "Verify formatted and retained"
+        expected:
+          retained: true
+
+      - scenario: "Newsletter preference"
+        steps:
+          - action: "Toggle newsletter: On"
+            selector: "input[name='newsletter'][type='checkbox']"
+          - action: "Navigate and return"
+          - action: "Verify preference retained"
+            expected:
+              newsletter_checked: true
+
+      - scenario: "Website and profitability"
+        steps:
+          - action: "Enter website URL"
+            selector: "input[name='website']"
+            input: "https://example.com"
+          - action: "Select profitable: Yes"
+            selector: "input[name='profitable'][value='yes']"
+          - action: "Verify both persist"
+            expected:
+              website_retained: "https://example.com"
+              profitable: "Yes"
+
+    assertions:
+      - "Optional-phone path remains usable"
+      - "Preferences and values persist across navigation"
+
+  - id: TP23
+    title: "Renovation Purpose Selection"
+    priority: P1
+    requirement_id: FR09
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify renovation purpose and conditional plan description field"
+
+    steps:
+      - step: "Select purpose: Renovation"
+        selector: "select[name='purpose']"
+        input: "Renovation"
+      - step: "Verify conditional renovation-plan field appears"
+        selector: "textarea[name='renovation_plan']"
+        expected:
+          visible: true
+      - step: "Enter renovation plan description"
+        selector: "textarea[name='renovation_plan']"
+        input: "{{TD01_RENOVATION_PLAN}}"
+      - step: "Enter business description"
+        selector: "textarea[name='business_description']"
+        input: "{{TD01_BUSINESS_DESCRIPTION}}"
+      - step: "Verify both descriptions in Summary"
+        expected:
+          renovation_plan_shown: true
+          business_description_shown: true
+          purpose_consistent: "Renovation"
+
+    assertions:
+      - "Conditional plan field appears for Renovation"
+      - "Purpose/descriptions remain consistent in Summary and LOS"
+
+  - id: TP24
+    title: "Multiple Purposes and Amount Totals"
+    priority: P1
+    requirement_id: FR09
+    test_data_id: TD04
+    basis: Proposed
+    confirmation: "Q09"
+    description: "Verify multiple purpose selection and amount calculation"
+
+    scenarios:
+      - scenario: "Select multiple purposes"
+        steps:
+          - action: "Select first purpose: Renovation"
+            selector: "input[type='checkbox'][value='Renovation']"
+          - action: "Select second purpose: Working Capital"
+            selector: "input[type='checkbox'][value='Working Capital']"
+          - action: "Verify both selected"
+            expected:
+              renovation_checked: true
+              working_capital_checked: true
+          - action: "Inspect total amount"
+            expected:
+              total_amount_calculated: true
+
+      - scenario: "Remove all purposes"
+        steps:
+          - action: "Uncheck all purposes"
+            selector: "input[type='checkbox'][value='Renovation']"
+          - action: "Uncheck all purposes"
+            selector: "input[type='checkbox'][value='Working Capital']"
+          - action: "Observe total amount"
+            expected:
+              total_amount: "$0.00"
+              investigate_if_unresolved: true
+
+      - scenario: "Edit conditional descriptions for multiple purposes"
+        steps:
+          - action: "Select purpose with conditional field"
+          - action: "Enter description"
+          - action: "Change to another purpose"
+          - action: "Verify previous description retained or cleared per rule"
+        expected:
+          conditional_logic_correct: true
+
+    assertions:
+      - "Selection, descriptions and purpose amount totals follow agreed mapping"
+      - "Investigate $0.00 total under Q09"
+
+  - id: TP25
+    title: "Annual Household Income Calculation"
+    priority: P1
+    requirement_id: FR10
+    test_data_id: TD01
+    basis: Observed
+    confirmation: "Q10"
+    description: "Verify income inputs and annualization formula"
+
+    steps:
+      - step: "Enter take-home income: 80,000"
+        selector: "input[name='take_home_income']"
+        input: 80000
+      - step: "Enter outside income: 15,000"
+        selector: "input[name='outside_income']"
+        input: 15000
+      - step: "Inspect annual income field"
+        selector: "input[name='annual_income']"
+        expected:
+          calculated_value: 1140000
+      - step: "Change take-home to 75,000"
+        selector: "input[name='take_home_income']"
+        input: 75000
+      - step: "Verify annual income updates"
+        expected:
+          new_annual_income: true
+          calculation_correct: true
+
+    assertions:
+      - "Recorded pair yields annual 1,140,000 for TD01"
+      - "Annual value updates using agreed annualization formula"
+      - "Rounding follows approved specification"
+
+  - id: TP26
+    title: "Income and Expense Precision Validation"
+    priority: P1
+    requirement_id: FR10
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q10"
+    description: "Validate monetary fields precision and range"
+
+    scenarios:
+      - scenario: "Zero income value"
+        steps:
+          - action: "Enter 0 for take_home_income"
+            selector: "input[name='take_home_income']"
+            input: 0
+        expected:
+          zero_policy_applied: true
+
+      - scenario: "Negative income value"
+        steps:
+          - action: "Attempt negative value"
+            selector: "input[name='take_home_income']"
+            input: -5000
+        expected:
+          validation_error: true
+          message: "Income cannot be negative"
+
+      - scenario: "Decimal precision"
+        steps:
+          - action: "Enter decimal amount: 50000.50"
+            selector: "input[name='take_home_income']"
+            input: 50000.50
+        expected:
+          accepted: true
+          precision_maintained: true
+
+      - scenario: "Non-numeric value"
+        steps:
+          - action: "Attempt text input"
+            selector: "input[name='take_home_income']"
+            input: "abc"
+        expected:
+          validation_error: true
+
+      - scenario: "Very large amount"
+        steps:
+          - action: "Enter large income value"
+            selector: "input[name='take_home_income']"
+            input: 999999999
+        expected:
+          accepted_or_capped: true
+
+      - scenario: "Annual recalculation after edit"
+        steps:
+          - action: "Edit multiple income fields"
+          - action: "Verify no NaN or stale totals"
+            expected:
+              annual_total_valid: true
+              no_nan_values: true
+
+    assertions:
+      - "Zero/negative policy enforced per rules"
+      - "Range and precision follow approved rules"
+      - "No NaN or stale totals after recalculation"
+
+  - id: TP27
+    title: "Income Source Exclusivity"
+    priority: P2
+    requirement_id: FR10
+    test_data_id: TD04
+    basis: Proposed
+    confirmation: "Q10"
+    description: "Verify mutually exclusive income source selections"
+
+    scenarios:
+      - scenario: "Select 'Other' income source"
+        steps:
+          - action: "Check 'Other' income source"
+            selector: "input[type='checkbox'][value='Other']"
+          - action: "Verify conditional text field appears"
+            expected:
+              field_visible: true
+
+      - scenario: "Select 'None' source"
+        steps:
+          - action: "Check 'None' income source"
+            selector: "input[type='checkbox'][value='None']"
+          - action: "Verify other sources automatically unchecked"
+            expected:
+              other_sources_unchecked: true
+
+      - scenario: "Multiple non-business sources"
+        steps:
+          - action: "Select multiple non-business income sources"
+            selector: "input[type='checkbox'][value='Salary']"
+            selector: "input[type='checkbox'][value='Investment']"
+          - action: "Switch selections"
+          - action: "Verify exclusivity enforced per agreement"
+        expected:
+          selections_follow_rule: true
+
+      - scenario: "Contradictory None + other sources"
+        steps:
+          - action: "Attempt to select None with another source"
+          - action: "Observe handling per agreed rule"
+        expected:
+          conflict_handled: true
+
+    assertions:
+      - "Selections follow agreed exclusivity"
+      - "Contradictory combinations prevented"
+
+  - id: TP28
+    title: "Household Consistency Validation"
+    priority: P1
+    requirement_id: FR11
+    test_data_id: TD02
+    basis: Proposed
+    confirmation: "Q11"
+    description: "Verify household size and dependents relationships"
+
+    scenarios:
+      - scenario: "Valid household 2 with 1 under-18"
+        steps:
+          - action: "Enter household_size: 2"
+            selector: "input[name='household_size']"
+            input: 2
+          - action: "Enter under_18_count: 1"
+            selector: "input[name='under_18_count']"
+            input: 1
+          - action: "Verify accepted"
+        expected:
+          valid: true
+
+      - scenario: "Under-18 exceeds household"
+        steps:
+          - action: "Enter household_size: 2"
+            selector: "input[name='household_size']"
+            input: 2
+          - action: "Enter under_18_count: 3"
+            selector: "input[name='under_18_count']"
+            input: 3
+          - action: "Verify rejected"
+        expected:
+          validation_error: true
+          message: "Dependents cannot exceed household size"
+
+      - scenario: "Adult-applicant only (2/2)"
+        steps:
+          - action: "Enter household_size: 2"
+            input: 2
+          - action: "Enter under_18_count: 0"
+            input: 0
+          - action: "Verify accepted or flag per Q11"
+        expected:
+          adult_relationship_enforced: true
+
+    assertions:
+      - "Approved count/adult relationship enforced"
+      - "Invalid combinations cannot silently produce accepted data"
+
+  - id: TP29
+    title: "Employment and Weekly Hours Validation"
+    priority: P2
+    requirement_id: FR11
+    test_data_id: TD01, TD02
+    basis: Observed
+    confirmation: "Q11"
+    description: "Verify employment counts and working hours"
+
+    scenarios:
+      - scenario: "Valid employment profile"
+        steps:
+          - action: "Enter current FT: 21, PT: 0"
+            selector: "input[name='current_ft_employees']"
+            input: 21
+            selector: "input[name='current_pt_employees']"
+            input: 0
+          - action: "Enter planned FT: 4, PT: 0"
+            selector: "input[name='planned_ft_employees']"
+            input: 4
+            selector: "input[name='planned_pt_employees']"
+            input: 0
+          - action: "Select Growth: Yes"
+            selector: "input[name='growth_expected'][value='yes']"
+          - action: "Enter hours: 48"
+            selector: "input[name='weekly_hours']"
+            input: 48
+        expected:
+          accepted: true
+
+      - scenario: "Negative employee count"
+        steps:
+          - action: "Enter negative FT count"
+            selector: "input[name='current_ft_employees']"
+            input: -5
+        expected:
+          validation_error: true
+
+      - scenario: "Fractional employee count"
+        steps:
+          - action: "Enter fractional count: 2.5"
+            selector: "input[name='current_ft_employees']"
+            input: 2.5
+        expected:
+          rejected_or_rounded: true
+
+      - scenario: "Hour boundaries"
+        steps:
+          - action: "Enter hours: 168 (max per week)"
+            selector: "input[name='weekly_hours']"
+            input: 168
+          - action: "Verify accepted or capped per rule"
+        expected:
+          boundary_respected: true
+
+    assertions:
+      - "Valid profile persists"
+      - "Count/integer and hours bounds follow approved rules"
+
+  - id: TP30
+    title: "Decline Demographics Without Specific Categories"
+    priority: P1
+    requirement_id: FR12
+    test_data_id: TD01
+    basis: Observed
+    description: "Verify applicant can skip demographic disclosure"
+
+    steps:
+      - step: "Select demographic choice: 'I choose not to answer'"
+        selector: "button:has-text('I choose not to answer')"
+      - step: "Click Next"
+        selector: "button:has-text('Next')"
+      - step: "Verify References stage opens"
+        expected:
+          stage: "References"
+          opened: true
+      - step: "Verify no blocking demographic requirement"
+        expected:
+          demographics_optional: true
+
+    assertions:
+      - "References opens without requiring demographic categories"
+      - "Decline path functional"
+
+  - id: TP31
+    title: "Demographic Selection and Credit Mapping Rules"
+    priority: P1
+    requirement_id: FR12
+    test_data_id: TD04
+    basis: Proposed
+    confirmation: "Q12"
+    description: "Verify demographic selection exclusivity and credit impact"
+
+    scenarios:
+      - scenario: "Select multiple demographic categories"
+        steps:
+          - action: "Select multiple approved categories"
+            selector: "input[type='checkbox'][name='demographic_category']"
+
+      - scenario: "Select None/decline option"
+        steps:
+          - action: "Select 'None of the above'"
+            selector: "input[type='checkbox'][value='None']"
+          - action: "Verify other selections cleared"
+            expected:
+              other_categories_unchecked: true
+
+      - scenario: "Check credit/impact mapping"
+        steps:
+          - action: "Review mapped demographics for credit impact"
+          - action: "Verify against Q12 approval"
+        expected:
+          mapping_follows_specification: true
+
+    assertions:
+      - "Selection exclusivity follows Q12 rules"
+      - "No credit rule changes from protected demographic data"
+
+  - id: TP32
+    title: "Complete Both Personal and Business References"
+    priority: P1
+    requirement_id: FR13
+    test_data_id: TD04
+    basis: Observed
+    confirmation: "Q13"
+    description: "Verify complete reference entry with optional email fields"
+
+    steps:
+      - step: "Enter personal reference details"
+        selector: "input[name='personal_ref_name']"
+        input: "{{TD04_PERSONAL_REF_NAME}}"
+        selector: "input[name='personal_ref_phone']"
+        input: "{{TD04_PERSONAL_REF_PHONE}}"
+        selector: "select[name='personal_ref_relationship']"
+        input: "{{TD04_PERSONAL_REF_RELATIONSHIP}}"
+      - step: "Leave personal reference email blank"
+        selector: "input[name='personal_ref_email']"
+        expected:
+          empty: true
+      - step: "Enter business reference details"
+        selector: "input[name='business_ref_name']"
+        input: "{{TD04_BUSINESS_REF_NAME}}"
+        selector: "input[name='business_ref_phone']"
+        input: "{{TD04_BUSINESS_REF_PHONE}}"
+      - step: "Verify progression allowed without optional emails"
+        selector: "button:has-text('Next')"
+        expected:
+          progression_allowed: true
+
+    assertions:
+      - "Valid complete records follow agreed rule"
+      - "Blank optional emails do not block progression"
+
+  - id: TP33
+    title: "Skip Blank References"
+    priority: P1
+    requirement_id: FR13
+    test_data_id: TD04
+    basis: Proposed
+    confirmation: "Q13"
+    description: "Verify blank reference skip paths"
+
+    scenarios:
+      - scenario: "Both reference cards blank"
+        steps:
+          - action: "Leave both reference cards empty"
+          - action: "Click Next"
+            selector: "button:has-text('Next')"
+        expected:
+          skip_path_used: true
+          skip_matches_q13_policy: true
+
+      - scenario: "Personal reference only"
+        steps:
+          - action: "Enter only personal reference"
+          - action: "Leave business reference blank"
+          - action: "Click Next"
+        expected:
+          progression_allowed: true
+
+      - scenario: "Business reference only"
+        steps:
+          - action: "Leave personal reference blank"
+          - action: "Enter only business reference"
+          - action: "Click Next"
+        expected:
+          progression_allowed: true
+
+    assertions:
+      - "Blank-card skip matches approved Q13 policy"
+      - "No unintended requirement bypass"
+
+  - id: TP34
+    title: "Partial Invalid Reference Validation"
+    priority: P1
+    requirement_id: FR13
+    test_data_id: TD02
+    basis: Observed
+    confirmation: "Q13"
+    description: "Validate partial invalid reference data"
+
+    steps:
+      - step: "Enter invalid business last name (with slash)"
+        selector: "input[name='business_ref_last_name']"
+        input: "Smith/Jones"
+      - step: "Leave first name blank"
+        selector: "input[name='business_ref_first_name']"
+        expected:
+          empty: true
+      - step: "Leave phone and relationship blank"
+      - step: "Click Next"
+        selector: "button:has-text('Next')"
+      - step: "Observe inline validation errors"
+        expected:
+          validation_errors_shown: true
+          field_specific_messages: true
+      - step: "Clear all fields in business reference card"
+        selector: "button:has-text('Clear')"
+      - step: "Click Next"
+        selector: "button:has-text('Next')"
+      - step: "Verify all-blank skip rule applied"
+        expected:
+          skipped: true
+
+    assertions:
+      - "Inline validation appears for partial invalid data"
+      - "Clearing follows approved all-blank skip rule"

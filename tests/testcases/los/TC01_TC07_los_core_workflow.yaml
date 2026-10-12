@@ -1,0 +1,572 @@
+los_test_plan:
+  plan_name: "Finexus LOS - Simple Requirements and Test Plan"
+  status: "Draft for Review"
+  version: "1.0"
+  date: "2026-10-08"
+
+  purpose: "Verify the main LOS workflow: access LOS, open existing application, run qualification, accept, review borrower, move to Lending, and validate program selection requirement"
+
+  scope: "7 core test checks covering access, application details, qualification, acceptance, borrower review, lending transition, and program validation"
+
+---
+
+test_case:
+  id: TC01
+  title: "Access LOS from LMS"
+  requirement_id: R01
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Verify an authorised user can switch from LMS to LOS and view Loan Applications"
+
+  test_steps:
+    - step_id: 1
+      action: "Sign in with approved QA ADMIN account"
+      input: "Username: {{QA_LOS_USERNAME}}, Password: {{QA_LOS_PASSWORD}}"
+      expected: "LMS login page displays"
+      selector: "input[name='username']"
+      data:
+        username: "{{QA_LOS_USERNAME}}"
+        password: "{{QA_LOS_PASSWORD}}"
+
+    - step_id: 2
+      action: "Navigate to main dashboard or menu"
+      expected: "LMS dashboard loads successfully"
+      selector: "button:has-text('LOS'), a:has-text('Switch to LOS')"
+
+    - step_id: 3
+      action: "Switch from LMS to LOS"
+      input: "Click LOS switcher or navigation link"
+      expected: "Redirect to LOS with Loan Applications loaded"
+      selector: "button[data-testid='switch-los'], a[href*='los']"
+
+    - step_id: 4
+      action: "Verify Loan Applications list loads"
+      expected: "Application records are displayed in a list/table"
+      selector: "table, [role='grid'], .application-list"
+      assertions:
+        - loan_applications_list_visible: true
+        - existing_records_shown: true
+
+  assertions:
+    - los_page_loaded: true
+    - loan_applications_visible: true
+    - user_authenticated: true
+
+  tags: ["smoke", "access-control", "authentication"]
+  blockers:
+    - "LOS environment must be accessible"
+    - "QA admin account must be authorized"
+
+---
+
+test_case:
+  id: TC02
+  title: "Open Application Dashboard"
+  requirement_id: R02
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Selecting an existing application must open its dashboard with correct ID, status, stage and business information"
+
+  test_steps:
+    - step_id: 1
+      action: "Locate prepared New Entered application at Intake"
+      input: "Application ID: {{QA_APPLICATION_ID}}"
+      expected: "Application found in list with status 'New Entered'"
+      selector: "table tr, [role='row']"
+      data:
+        application_id: "{{QA_APPLICATION_ID}}"
+
+    - step_id: 2
+      action: "Click to open application"
+      expected: "Application dashboard opens"
+      selector: "a[href*='{{QA_APPLICATION_ID}}'], button[data-app-id='{{QA_APPLICATION_ID}}']"
+
+    - step_id: 3
+      action: "Verify application header shows correct ID"
+      expected: "Application ID matches: {{QA_APPLICATION_ID}}"
+      selector: "h1, [data-testid='app-header'], .app-id-display"
+      assertions:
+        - application_id_match: "{{QA_APPLICATION_ID}}"
+
+    - step_id: 4
+      action: "Verify status displays as 'New Entered'"
+      expected: "Status badge shows 'New Entered'"
+      selector: "[data-testid='status'], .status-badge"
+      assertions:
+        - status_display: "New Entered"
+
+    - step_id: 5
+      action: "Verify stage displays as 'Intake'"
+      expected: "Stage indicator shows 'Intake'"
+      selector: "[data-testid='stage'], .stage-indicator"
+      assertions:
+        - stage_display: "Intake"
+
+    - step_id: 6
+      action: "Verify business information displays"
+      expected: "Business name, type, and start date match QA source"
+      selector: "[data-testid='business-info'], .business-details"
+      data:
+        business_name: "{{QA_BUSINESS_NAME}}"
+        business_type: "{{QA_BUSINESS_TYPE}}"
+        start_date: "{{QA_BUSINESS_START_DATE}}"
+      assertions:
+        - business_name_match: true
+        - business_type_match: true
+        - start_date_match: true
+
+  assertions:
+    - dashboard_opened: true
+    - application_id_correct: true
+    - status_new_entered: true
+    - stage_intake: true
+    - business_info_displayed: true
+
+  tags: ["application-management", "data-display"]
+
+---
+
+test_case:
+  id: TC03
+  title: "Run Qualification"
+  requirement_id: R03
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Running qualification for an eligible application must complete and display Eligibility with Accept action available"
+
+  test_steps:
+    - step_id: 1
+      action: "Locate Run Qualification button/action"
+      expected: "Run Qualification button is visible and enabled"
+      selector: "button:has-text('Run Qualification'), button[data-action='run-qualification']"
+
+    - step_id: 2
+      action: "Click Run Qualification"
+      expected: "Processing indicator appears"
+      selector: "button:has-text('Run Qualification')"
+      assertions:
+        - click_successful: true
+
+    - step_id: 3
+      action: "Wait for qualification processing to complete"
+      wait: "{{QUALIFICATION_TIMEOUT_MS}}"
+      expected: "Processing completes and status updates"
+      selector: "[data-testid='qualification-result'], .qualification-status"
+
+    - step_id: 4
+      action: "Verify status shows 'Eligibility'"
+      expected: "Status field displays 'Eligibility'"
+      selector: "[data-testid='status'], .status-badge"
+      assertions:
+        - status_eligibility: true
+
+    - step_id: 5
+      action: "Verify Accept action is available"
+      expected: "Accept button is visible and enabled"
+      selector: "button:has-text('Accept'), button[data-action='accept']"
+      assertions:
+        - accept_button_visible: true
+        - accept_button_enabled: true
+
+    - step_id: 6
+      action: "Verify application ID unchanged"
+      expected: "Application ID remains {{QA_APPLICATION_ID}}"
+      selector: "[data-testid='app-header']"
+      assertions:
+        - application_id_unchanged: "{{QA_APPLICATION_ID}}"
+
+  assertions:
+    - qualification_completed: true
+    - status_shows_eligibility: true
+    - accept_action_available: true
+    - application_id_retained: true
+
+  tags: ["qualification", "business-logic"]
+  notes: "No timing threshold defined; log any service errors or excessive delays"
+
+---
+
+test_case:
+  id: TC04
+  title: "Accept Application"
+  requirement_id: R04
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Accepting an eligible application must show success result and make Proceed to Lending available"
+
+  test_steps:
+    - step_id: 1
+      action: "Click Accept button"
+      expected: "Accept action initiated"
+      selector: "button:has-text('Accept'), button[data-action='accept']"
+
+    - step_id: 2
+      action: "Wait for acceptance to complete"
+      wait: "{{ACCEPTANCE_TIMEOUT_MS}}"
+      expected: "Success notification appears"
+      selector: "[role='status'], [data-testid='success-message'], .success-notification"
+      assertions:
+        - success_notification_shown: true
+
+    - step_id: 3
+      action: "Verify success message content"
+      expected: "Notification confirms successful acceptance"
+      selector: ".notification-text, [data-testid='notification-content']"
+      assertions:
+        - message_type: "success"
+        - contains_accept_confirmation: true
+
+    - step_id: 4
+      action: "Verify Proceed to Lending action becomes available"
+      expected: "Proceed to Lending button is visible and enabled"
+      selector: "button:has-text('Proceed to Lending'), button[data-action='proceed-to-lending']"
+      assertions:
+        - proceed_to_lending_visible: true
+        - proceed_to_lending_enabled: true
+
+    - step_id: 5
+      action: "Verify application stage remains at Intake"
+      expected: "Stage indicator still shows 'Intake' (no automatic advance)"
+      selector: "[data-testid='stage'], .stage-indicator"
+      assertions:
+        - stage_still_intake: true
+
+    - step_id: 6
+      action: "Verify status still shows Eligibility"
+      expected: "Status remains 'Eligibility' after acceptance"
+      selector: "[data-testid='status']"
+      assertions:
+        - status_eligibility: true
+
+  assertions:
+    - acceptance_successful: true
+    - success_notification_shown: true
+    - proceed_to_lending_available: true
+    - stage_unchanged: true
+    - status_eligibility_retained: true
+
+  tags: ["acceptance", "workflow-transition"]
+
+---
+
+test_case:
+  id: TC05
+  title: "Review Parties & Credit"
+  requirement_id: R05
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Parties & Credit must display borrower linked to application with personal, ownership and credit information"
+
+  test_steps:
+    - step_id: 1
+      action: "Navigate to Parties & Credit tab"
+      expected: "Parties & Credit tab visible and accessible"
+      selector: "button[data-tab='parties-credit'], a:has-text('Parties & Credit'), [aria-label='Parties & Credit']"
+
+    - step_id: 2
+      action: "Click Parties & Credit tab"
+      expected: "Tab content loads showing borrower information"
+      selector: "button[data-tab='parties-credit']"
+
+    - step_id: 3
+      action: "Verify borrower is displayed for the application"
+      expected: "Borrower name matches: {{QA_BORROWER_NAME}}"
+      selector: "[data-testid='borrower-name'], .borrower-details"
+      data:
+        borrower_name: "{{QA_BORROWER_NAME}}"
+      assertions:
+        - borrower_name_match: "{{QA_BORROWER_NAME}}"
+
+    - step_id: 4
+      action: "Verify ownership percentage displayed"
+      expected: "Ownership shows: {{QA_OWNERSHIP_PERCENT}}%"
+      selector: "[data-testid='ownership'], .ownership-display"
+      data:
+        ownership_percent: "{{QA_OWNERSHIP_PERCENT}}"
+      assertions:
+        - ownership_match: "{{QA_OWNERSHIP_PERCENT}}%"
+
+    - step_id: 5
+      action: "Verify personal information displayed"
+      expected: "Personal details (DOB, address, contact) visible"
+      selector: "[data-testid='personal-info'], .personal-details"
+      assertions:
+        - personal_info_visible: true
+
+    - step_id: 6
+      action: "Verify credit information displayed"
+      expected: "Credit score, history, or status shown"
+      selector: "[data-testid='credit-info'], .credit-details"
+      assertions:
+        - credit_info_visible: true
+
+    - step_id: 7
+      action: "Verify viewing does not change application stage"
+      expected: "Application stage remains 'Intake'"
+      selector: "[data-testid='stage']"
+      assertions:
+        - stage_unchanged: true
+
+  assertions:
+    - tab_loaded: true
+    - borrower_displayed: true
+    - borrower_name_correct: true
+    - ownership_shown: true
+    - personal_info_visible: true
+    - credit_info_visible: true
+    - stage_unchanged: true
+
+  tags: ["borrower-info", "data-review"]
+
+---
+
+test_case:
+  id: TC06
+  title: "Move Application to Lending"
+  requirement_id: R06
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Proceed to Lending must move application from Intake to Lending, retaining application ID"
+
+  test_steps:
+    - step_id: 1
+      action: "Return to application dashboard"
+      expected: "Dashboard view shown with stage indicator"
+      selector: "[data-testid='app-header'], .application-dashboard"
+
+    - step_id: 2
+      action: "Locate Proceed to Lending button"
+      expected: "Button is visible and enabled"
+      selector: "button:has-text('Proceed to Lending'), button[data-action='proceed-to-lending']"
+
+    - step_id: 3
+      action: "Click Proceed to Lending"
+      expected: "Transition initiated"
+      selector: "button:has-text('Proceed to Lending')"
+
+    - step_id: 4
+      action: "Wait for stage transition to complete"
+      wait: "{{STAGE_TRANSITION_TIMEOUT_MS}}"
+      expected: "Stage updates and completion animation/indicator shown"
+      selector: "[data-testid='stage'], .stage-indicator"
+
+    - step_id: 5
+      action: "Verify Intake stage marked as complete"
+      expected: "Intake stage shows as completed/checked"
+      selector: "[data-testid='intake-stage'], .stage-item[data-stage='intake']"
+      assertions:
+        - intake_completed: true
+
+    - step_id: 6
+      action: "Verify Lending stage is now active"
+      expected: "Lending stage highlighted as current"
+      selector: "[data-testid='lending-stage'], .stage-item[data-stage='lending']"
+      assertions:
+        - lending_active: true
+
+    - step_id: 7
+      action: "Verify application ID unchanged"
+      expected: "Application ID still shows {{QA_APPLICATION_ID}}"
+      selector: "[data-testid='app-id']"
+      assertions:
+        - application_id_retained: "{{QA_APPLICATION_ID}}"
+
+    - step_id: 8
+      action: "Verify status remains Eligibility"
+      expected: "Status field still shows 'Eligibility'"
+      selector: "[data-testid='status']"
+      assertions:
+        - status_eligibility: true
+
+    - step_id: 9
+      action: "Verify Move to Intake action available"
+      expected: "Option to move back to Intake is shown"
+      selector: "button:has-text('Move to Intake'), [data-action='move-to-intake']"
+      assertions:
+        - move_back_available: true
+
+    - step_id: 10
+      action: "Verify Proceed to Underwriting action available"
+      expected: "Button to proceed to Underwriting is shown"
+      selector: "button:has-text('Proceed to Underwriting'), [data-action='proceed-to-underwriting']"
+      assertions:
+        - proceed_underwriting_available: true
+
+  assertions:
+    - transition_successful: true
+    - intake_completed: true
+    - lending_active: true
+    - application_id_retained: true
+    - status_unchanged: true
+    - navigation_options_available: true
+
+  tags: ["workflow-transition", "stage-management"]
+
+---
+
+test_case:
+  id: TC07
+  title: "Block Underwriting Without Program Selection"
+  requirement_id: R07
+  priority: P1
+  basis: "Observed in recording"
+
+  description: "Proceeding to Underwriting without selected program must be blocked with validation message and Program & Pricing tab opened"
+
+  test_steps:
+    - step_id: 1
+      action: "Verify no program is selected"
+      input: "Ensure Program & Pricing has no selection"
+      expected: "Program field shows empty or 'No program selected'"
+      selector: "[data-testid='selected-program'], .program-display"
+      assertions:
+        - program_not_selected: true
+
+    - step_id: 2
+      action: "Click Proceed to Underwriting"
+      expected: "Action attempted with no program selected"
+      selector: "button:has-text('Proceed to Underwriting'), [data-action='proceed-to-underwriting']"
+
+    - step_id: 3
+      action: "Observe validation block"
+      expected: "Underwriting transition blocked with validation message"
+      selector: "[role='alert'], .validation-error, .error-message"
+      assertions:
+        - validation_shown: true
+
+    - step_id: 4
+      action: "Verify validation message content"
+      expected: "Message reads: 'Program selection is required before proceeding to Underwriting. Please select a program in the Special Program section.'"
+      selector: ".validation-error, [data-testid='validation-message']"
+      capture_text: true
+      assertions:
+        - message_exact: "Program selection is required before proceeding to Underwriting. Please select a program in the Special Program section."
+
+    - step_id: 5
+      action: "Verify Program & Pricing tab automatically opens"
+      expected: "Program & Pricing tab is now active/visible"
+      selector: "button[data-tab='program-pricing'], [aria-label='Program & Pricing']"
+      assertions:
+        - program_pricing_tab_open: true
+
+    - step_id: 6
+      action: "Verify application stage remains at Lending"
+      expected: "Stage indicator shows Lending (no advancement to Underwriting)"
+      selector: "[data-testid='stage'], .stage-indicator"
+      assertions:
+        - stage_remains_lending: true
+
+    - step_id: 7
+      action: "Verify application has not entered Underwriting"
+      expected: "Underwriting stage not active; Lending still current"
+      selector: "[data-testid='underwriting-stage']"
+      assertions:
+        - underwriting_not_active: true
+
+  assertions:
+    - validation_blocking_works: true
+    - correct_error_message: true
+    - program_pricing_opened: true
+    - stage_remains_lending: true
+    - underwriting_not_entered: true
+
+  tags: ["validation", "business-logic", "workflow-guard"]
+
+---
+
+test_data_profiles:
+
+  LOS_QA01:
+    description: "Admin user with full access to eligible application at Intake"
+    environment: "{{QA_LOS_BASE_URL}}"
+    credentials:
+      username: "{{QA_LOS_ADMIN_USERNAME}}"
+      password: "{{QA_LOS_ADMIN_PASSWORD}}"
+    application:
+      id: "{{QA_APPLICATION_ID}}"
+      status: "New Entered"
+      stage: "Intake"
+      business_name: "{{QA_BUSINESS_NAME}}"
+      business_type: "{{QA_BUSINESS_TYPE}}"
+      start_date: "{{QA_BUSINESS_START_DATE}}"
+    borrower:
+      name: "{{QA_BORROWER_NAME}}"
+      ownership_percent: "{{QA_OWNERSHIP_PERCENT}}"
+      dob: "{{QA_BORROWER_DOB}}"
+      address: "{{QA_BORROWER_ADDRESS}}"
+    qualification:
+      eligible: true
+      reason: "Meets all qualification criteria"
+    program:
+      selected: false
+      note: "For TC07 validation test"
+
+---
+
+test_prerequisites:
+
+  - name: "LOS Environment"
+    requirement: "Approved QA environment LMS and LOS URLs must be accessible"
+    status: "{{ENV_STATUS}}"
+
+  - name: "Admin Account"
+    requirement: "Authorised ADMIN account with full access to applications and Lending workflow"
+    status: "{{ADMIN_ACCOUNT_STATUS}}"
+
+  - name: "Test Application"
+    requirement: "Existing New Entered application at Intake stage that is eligible for qualification"
+    requirement_detail: "Application ID: {{QA_APPLICATION_ID}}"
+    status: "{{TEST_APP_STATUS}}"
+
+  - name: "Qualification Service"
+    requirement: "Qualification service configured and available for execution"
+    status: "{{QUALIFICATION_SERVICE_STATUS}}"
+
+  - name: "Test Data"
+    requirement: "Business and borrower data available for verification comparison"
+    status: "{{TEST_DATA_STATUS}}"
+
+---
+
+test_execution_order: "TC01 → TC02 → TC03 → TC04 → TC05 → TC06 → TC07 (sequential on same application)"
+
+test_evidence_requirements:
+  - application_id: "Capture and record for all test cases"
+  - status_displays: "Screenshot at each status change"
+  - stage_transitions: "Screenshot of stage indicator at each transition"
+  - validation_message: "Screenshot of TC07 validation message (exact text required)"
+  - error_logs: "Any service errors or processing delays"
+  - build_version: "LOS build/environment version used"
+  - execution_date: "Date and tester name for each execution"
+
+---
+
+exit_criteria:
+  pass_condition: "All 7 test cases (TC01-TC07) pass with correct data and behaviors"
+  fail_condition: "Any test case fails or produces incorrect result"
+  blocked_condition: "Test cannot execute due to missing prerequisite or environment issue"
+  acceptance_criteria: "All core workflow steps verified; ready for extended testing"
+
+---
+
+items_for_confirmation:
+  - "Exact qualification rules and approved eligible test data"
+  - "Whether Eligibility status after acceptance and Lending transition is intended behaviour"
+  - "Approved environment pairing confirmation (lms-dev and los-dev)"
+  - "Program selection and Underwriting progression need separate recording or requirement"
+
+---
+
+out_of_scope:
+  - "Application creation workflow"
+  - "Full field validation across all tabs"
+  - "Other user roles (Underwriter, Compliance, etc.)"
+  - "System integrations (credit bureaus, email, etc.)"
+  - "Withdraw and Decline workflows"
+  - "Later loan stages (Underwriting, Closing, Funding, etc.)"

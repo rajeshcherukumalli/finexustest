@@ -1,0 +1,94 @@
+{
+  "contract_version": "1.1.0",
+  "application": {
+    "name": "Test App",
+    "base_url": "https://example.test"
+  },
+  "extraction_metadata": {
+    "scraped_at": "2026-06-09T00:00:00+00:00"
+  },
+  "route_index": [
+    {"page_id": "home", "path": "/", "page_type": "nav"},
+    {"page_id": "help", "path": "/help", "page_type": "content"},
+    {"page_id": "privacypolicy", "path": "/privacypolicy", "page_type": "content"}
+  ],
+  "home_navigation": [
+    {
+      "element_id": "help_link",
+      "label": "Help",
+      "target_path": "/help",
+      "raw_href": "/help",
+      "assert": {"kind": "pathname", "value": "/help"}
+    },
+    {
+      "element_id": "privacy_link",
+      "label": "Privacy policy",
+      "target_path": "/privacypolicy",
+      "raw_href": "/privacypolicy",
+      "assert": {"kind": "pathname", "value": "/privacypolicy"}
+    },
+    {
+      "element_id": "faq_hash",
+      "label": "FAQ",
+      "target_path": "/#faq",
+      "raw_href": "/#faq",
+      "assert": {"kind": "hash", "value": "#faq"}
+    }
+  ],
+  "pages": [
+    {
+      "page_id": "home",
+      "path": "/",
+      "page_type": "nav",
+      "elements": [
+        {
+          "element_id": "help_link",
+          "role": "link",
+          "label": "Help",
+          "target_path": "/help",
+          "href": "https://example.test/help",
+          "selectors": {"playwright": "page.getByRole('link', { name: 'Help' })"}
+        },
+        {
+          "element_id": "privacy_link",
+          "role": "link",
+          "label": "Privacy policy",
+          "target_path": "/privacypolicy",
+          "href": "https://example.test/privacypolicy",
+          "selectors": {"playwright": "page.getByRole('link', { name: 'Privacy policy' })"}
+        },
+        {
+          "element_id": "faq_hash",
+          "role": "link",
+          "label": "FAQ",
+          "target_path": "/#faq",
+          "href": "https://example.test/#faq",
+          "fragment": "faq",
+          "selectors": {"playwright": "page.getByRole('link', { name: 'FAQ' })"}
+        },
+        {
+          "element_id": "assets_btn",
+          "role": "button",
+          "label": "Assets",
+          "target_path": "/assets-section",
+          "selectors": {"playwright": "page.getByRole('button', { name: 'Assets', exact: true })"}
+        }
+      ],
+      "forms": []
+    },
+    {
+      "page_id": "assets_section",
+      "path": "/assets-section",
+      "page_type": "list",
+      "elements": [
+        {
+          "element_id": "search_assets",
+          "role": "input",
+          "label": "Search assets",
+          "selectors": {"playwright": "page.getByRole('textbox', { name: 'Search assets', exact: true })"}
+        }
+      ],
+      "forms": []
+    }
+  ]
+}

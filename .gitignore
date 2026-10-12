@@ -1,0 +1,12 @@
+.venv/
+.env
+site_map.json
+*-contract.json
+generated_tests/
+output/
+data/
+__pycache__/
+*.pyc
+*.docx
+node_modules/
+dist/

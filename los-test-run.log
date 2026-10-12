@@ -1,0 +1,121 @@
+
+Running 8 tests using 1 worker
+
+🔷 TC01: Access LOS
+✓ Current URL: https://los.finexusinc.ai/login/
+✓ Login form elements: 2
+✓ Application list elements: 0
+✓ TC01 PASS: LOS page loaded
+
+  ✓  1 [chromium] › tests/specs/los_workflow.spec.ts:24:7 › LOS Admin Portal Workflow (TC01-TC07) › TC01: Access LOS from LMS and view Loan Applications (5.4s)
+🔷 TC02: Open Application Dashboard
+ℹ Application APP-0000001305 not immediately visible
+  ✘  2 [chromium] › tests/specs/los_workflow.spec.ts:57:7 › LOS Admin Portal Workflow (TC01-TC07) › TC02: Open application dashboard with correct details (30.1s)
+🔷 TC03: Run Qualification
+ℹ Run Qualification button not found
+✓ Status elements: 0
+✓ Eligibility mentions: 0
+✓ Accept button visible: false
+✓ TC03 PASS: Qualification completed
+
+  ✓  3 [chromium] › tests/specs/los_workflow.spec.ts:93:7 › LOS Admin Portal Workflow (TC01-TC07) › TC03: Run qualification and display Eligibility status (2.7s)
+🔷 TC04: Accept Application
+✓ Success notification elements: 0
+✓ Proceed to Lending visible: false
+✓ TC04 PASS: Application accepted
+
+  ✓  4 [chromium] › tests/specs/los_workflow.spec.ts:133:7 › LOS Admin Portal Workflow (TC01-TC07) › TC04: Accept application and enable Proceed to Lending (2.6s)
+🔷 TC05: Parties & Credit Review
+  ✘  5 [chromium] › tests/specs/los_workflow.spec.ts:168:7 › LOS Admin Portal Workflow (TC01-TC07) › TC05: Review Parties & Credit tab with borrower information (30.1s)
+🔷 TC06: Move to Lending
+  ✘  6 [chromium] › tests/specs/los_workflow.spec.ts:200:7 › LOS Admin Portal Workflow (TC01-TC07) › TC06: Move application from Intake to Lending stage (30.1s)
+🔷 TC07: Program Validation
+  ✘  7 [chromium] › tests/specs/los_workflow.spec.ts:244:7 › LOS Admin Portal Workflow (TC01-TC07) › TC07: Block Underwriting without program selection (30.1s)
+
+╔════════════════════════════════════════════════════════╗
+║         LOS ADMIN PORTAL TEST EXECUTION COMPLETE       ║
+╠════════════════════════════════════════════════════════╣
+║ Test Cases Executed: 7 (TC01-TC07)                     ║
+║ Expected: All sequential tests pass                    ║
+║ Application: APP-0000001305                              ║
+║ Environment: https://los.finexusinc.ai                                ║
+║ Date: 2026-10-08                                       ║
+╚════════════════════════════════════════════════════════╝
+    
+  ✓  8 [chromium] › tests/specs/los_workflow.spec.ts:300:7 › LOS Test Summary › Print execution summary (2ms)
+
+
+  1) [chromium] › tests/specs/los_workflow.spec.ts:57:7 › LOS Admin Portal Workflow (TC01-TC07) › TC02: Open application dashboard with correct details › Verify dashboard displays correct information 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.textContent: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid*="status"], .status').first()[22m
+
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:81:92)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:78:5)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/los_workflow-LOS-Admin-Por-f8f78-hboard-with-correct-details-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/los_workflow-LOS-Admin-Por-f8f78-hboard-with-correct-details-chromium/error-context.md
+
+  2) [chromium] › tests/specs/los_workflow.spec.ts:168:7 › LOS Admin Portal Workflow (TC01-TC07) › TC05: Review Parties & Credit tab with borrower information › Verify borrower details displayed 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.textContent: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid*="borrower"], .borrower-name, .name').first()[22m
+
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:187:107)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:186:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/los_workflow-LOS-Admin-Por-9fe99-b-with-borrower-information-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/los_workflow-LOS-Admin-Por-9fe99-b-with-borrower-information-chromium/error-context.md
+
+  3) [chromium] › tests/specs/los_workflow.spec.ts:200:7 › LOS Admin Portal Workflow (TC01-TC07) › TC06: Move application from Intake to Lending stage › Verify stage changed to Lending 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.textContent: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid*="stage"], .stage-indicator, .current-stage').first()[22m
+
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:219:115)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:218:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/los_workflow-LOS-Admin-Por-67163-rom-Intake-to-Lending-stage-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/los_workflow-LOS-Admin-Por-67163-rom-Intake-to-Lending-stage-chromium/error-context.md
+
+  4) [chromium] › tests/specs/los_workflow.spec.ts:244:7 › LOS Admin Portal Workflow (TC01-TC07) › TC07: Block Underwriting without program selection › Verify no program is selected 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.textContent: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid*="program"], .selected-program, .program-display').first()[22m
+
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:252:122)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/los_workflow.spec.ts:251:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/los_workflow-LOS-Admin-Por-9393e-g-without-program-selection-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/los_workflow-LOS-Admin-Por-9393e-g-without-program-selection-chromium/error-context.md
+
+  4 failed
+    [chromium] › tests/specs/los_workflow.spec.ts:57:7 › LOS Admin Portal Workflow (TC01-TC07) › TC02: Open application dashboard with correct details 
+    [chromium] › tests/specs/los_workflow.spec.ts:168:7 › LOS Admin Portal Workflow (TC01-TC07) › TC05: Review Parties & Credit tab with borrower information 
+    [chromium] › tests/specs/los_workflow.spec.ts:200:7 › LOS Admin Portal Workflow (TC01-TC07) › TC06: Move application from Intake to Lending stage 
+    [chromium] › tests/specs/los_workflow.spec.ts:244:7 › LOS Admin Portal Workflow (TC01-TC07) › TC07: Block Underwriting without program selection 
+  4 passed (2.3m)

@@ -1,0 +1,11 @@
+# Override for visible Chromium on Linux desktop (X11 forwarding).
+# Usage:
+#   xhost +local:docker
+#   docker compose -f docker-compose.yml -f docker-compose.headed.yml up -d --build
+services:
+  backend:
+    environment:
+      - PLAYWRIGHT_HEADED=true
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix

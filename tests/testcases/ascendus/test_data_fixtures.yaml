@@ -1,0 +1,357 @@
+test_data_fixtures:
+
+  TD01:
+    description: "Successful Renovation application - base profile"
+    provisioning_rule: "Fresh email; approved unique identities/address; valid referral and Plaid fixture"
+    test_case_ids: ["TP01", "TP04", "TP08", "TP11", "TP16", "TP18", "TP23", "TP25", "TP30", "TP35", "TP41", "TP42", "TP48"]
+
+    applicant:
+      first_name: "John"
+      last_name: "Smith"
+      phone: "+1-555-0123"
+      email: "{{QA_EMAIL}}"
+      language: "English"
+      dob: "1985-03-15"
+      ssn: "{{APPROVED_SSN_1}}"
+      citizenship: "No"
+
+    business:
+      legal_name: "Smith Renovation LLC"
+      structure: "General Partnership"
+      industry: "Retail Trade"
+      sub_industry: "Specialty Stores"
+      start_date: "2018-06-01"
+      ein: "{{APPROVED_EIN_1}}"
+      business_address: "123 Main St, Atlanta, GA 30303"
+      business_street: "123 Main St"
+      business_city: "Atlanta"
+      business_state: "GA"
+      business_zip: "30303"
+
+    home_address: "456 Oak Ave, Atlanta, GA 30310"
+    home_street: "456 Oak Ave"
+    home_city: "Atlanta"
+    home_state: "GA"
+    home_zip: "30310"
+
+    application:
+      amount: 25000
+      state: "Georgia"
+      purpose: "Renovation"
+      renovation_plan: "Kitchen and bathroom remodel over 6 months"
+      business_description: "Full-service home renovation contractor"
+
+    applicant_details:
+      ownership_percent: 90
+      same_address: true
+      website: "https://smithreno.example.com"
+      newsletter: true
+      profitable: "Yes"
+
+    income:
+      take_home_income: 80000
+      outside_income: 15000
+      annual_income: 1140000
+      income_source: "Business"
+
+    household:
+      household_size: 2
+      under_18_count: 1
+      current_ft_employees: 21
+      current_pt_employees: 0
+      planned_ft_employees: 4
+      planned_pt_employees: 0
+      growth_expected: true
+      weekly_hours: 48
+
+    demographics:
+      choice: "decline"
+
+    references:
+      personal:
+        name: "Jane Doe"
+        phone: "+1-555-0456"
+        relationship: "Friend"
+        email: ""
+
+    bank:
+      plaid_sandbox_id: "{{PLAID_SANDBOX_ID}}"
+      plaid_sandbox_code: "{{PLAID_SANDBOX_CODE}}"
+      plaid_account_id: "{{PLAID_ACCOUNT_ID}}"
+
+    referral:
+      source: "Community Organization"
+      organization: "{{QA_ORGANIZATION}}"
+      referrer: "{{QA_REFERRER}}"
+
+    expected_outcome:
+      generated_id: "{{GENERATED_AT_RUNTIME}}"
+      amount: 25000.00
+      status: "New Entered"
+      stage: "Intake"
+      purpose: "Renovation"
+
+  TD02:
+    description: "Field validation and boundary testing"
+    provisioning_rule: "Modify one field per iteration; approved limits required for boundary verdicts"
+    test_case_ids: ["TP02", "TP03", "TP10", "TP12", "TP15", "TP16", "TP26", "TP29"]
+
+    validation_scenarios:
+      - scenario: "Blank mandatory fields"
+        fields: ["amount", "state", "email", "initial_agreement"]
+
+      - scenario: "Invalid amount formats"
+        amount_tests:
+          - value: "{{MIN_AMOUNT}}"
+            expected: "accepted"
+          - value: "{{MIN_AMOUNT - 1}}"
+            expected: "rejected"
+          - value: "{{MAX_AMOUNT}}"
+            expected: "accepted"
+          - value: "{{MAX_AMOUNT + 1}}"
+            expected: "rejected"
+
+      - scenario: "Malformed email"
+        emails:
+          - "notanemail"
+          - "user@"
+          - "@example.com"
+
+      - scenario: "Phone formatting"
+        phones:
+          - input: "(555) 123-4567"
+            expected: "+1-555-123-4567"
+          - input: "555-abc-defg"
+            expected: "rejected"
+
+      - scenario: "Name boundaries"
+        name_lengths:
+          - at_max: "{{MAX_NAME_LENGTH_STRING}}"
+          - exceeds_max: "{{EXCEEDS_MAX_NAME_LENGTH_STRING}}"
+
+      - scenario: "Business date validation"
+        dates:
+          - future_date: "{{FUTURE_DATE}}"
+          - invalid_format: "13/45/2099"
+
+      - scenario: "EIN validation"
+        ein_tests:
+          - valid: "{{APPROVED_EIN_2}}"
+          - malformed: "00-000-0000"
+          - duplicate: "{{EXISTING_EIN}}"
+
+      - scenario: "Income precision"
+        income_tests:
+          - zero: 0
+          - negative: -5000
+          - decimal: 50000.50
+          - text: "abc"
+
+  TD03:
+    description: "Email verification failures"
+    provisioning_rule: "Fresh current codes and controlled wrong/expired/reused code fixtures"
+    test_case_ids: ["TP05", "TP06"]
+
+    otp_scenarios:
+      - scenario: "Wrong code"
+        code: "000000"
+        expected_error: "Invalid verification code"
+
+      - scenario: "Incomplete code"
+        code: "1234"
+        expected_error: "Code must be 6 digits"
+
+      - scenario: "Expired code"
+        code: "{{EXPIRED_OTP}}"
+        age_minutes: "> {{OTP_EXPIRY_MINUTES}}"
+        expected_error: "Code has expired"
+
+      - scenario: "Reused code after successful use"
+        code: "{{USED_OTP}}"
+        expected_error: "Code has already been used"
+
+      - scenario: "Prior code after resend"
+        first_code: "{{FIRST_OTP}}"
+        second_code: "{{SECOND_OTP}}"
+        expected_error: "Code has expired or is invalid"
+
+  TD04:
+    description: "Conditional and optional branches"
+    provisioning_rule: "Referral changes, address choices, purposes, demographics, references"
+    test_case_ids: ["TP09", "TP21", "TP22", "TP24", "TP27", "TP31", "TP32", "TP33", "TP43"]
+
+    branches:
+      referral_sources: ["Community Organization", "Self", "Bank Partner"]
+
+      purposes:
+        - "Renovation"
+        - "Working Capital"
+        - "Equipment"
+
+      demographics:
+        - "I choose not to answer"
+        - "Category A"
+        - "Category B"
+
+      income_sources:
+        - "Business"
+        - "Salary"
+        - "Investment"
+        - "Other"
+        - "None"
+
+      reference_combinations:
+        - "Both complete"
+        - "Personal only"
+        - "Business only"
+        - "Both blank"
+        - "Partial invalid"
+
+  TD05:
+    description: "Bank connection and file paths"
+    provisioning_rule: "Approved sandbox success/cancel/failure fixtures and valid/invalid statement files"
+    test_case_ids: ["TP35", "TP36", "TP37", "TP38", "TP39", "TP40"]
+
+    plaid_scenarios:
+      successful:
+        sandbox_id: "{{PLAID_SANDBOX_ID}}"
+        sandbox_code: "{{PLAID_SANDBOX_CODE}}"
+        account_id: "{{PLAID_ACCOUNT_ID}}"
+
+      cancel_scenarios:
+        - "Cancel before selection"
+        - "Cancel after login"
+
+      failure_scenarios:
+        - "Provider timeout"
+        - "Invalid credentials"
+
+    statement_files:
+      approved:
+        - filename: "bank_statement_approved.pdf"
+          size_kb: 250
+
+      rejected:
+        - type: "Disallowed extension"
+          filename: "malware.exe"
+        - type: "Zero-byte"
+          filename: "empty.pdf"
+        - type: "Over-limit"
+          filename: "huge_file.pdf"
+          size_kb: 50000
+        - type: "Corrupt"
+          filename: "corrupted.pdf"
+
+  TD06:
+    description: "Recovery and persistence"
+    provisioning_rule: "Confirmed integration error, request timeout, duplicate submit, resume fixtures"
+    test_case_ids: ["TP14", "TP19", "TP20", "TP44", "TP47"]
+
+    error_scenarios:
+      ecdup01:
+        error_type: "Duplicate identity"
+        trigger_fixture: "{{ECDUP01_FIXTURE}}"
+        recovery_path: "Continue and retry"
+
+      duplicate_submission:
+        scenario: "Double-click Submit"
+        recovery: "Idempotent handling"
+
+      network_timeout:
+        scenario: "Response timeout during submit"
+        recovery: "Retry with duplicate prevention"
+
+      refresh_scenarios:
+        - stage: "Terms"
+          expected: "State preserved"
+        - stage: "Income Information"
+          expected: "All fields retained"
+        - stage: "Bank return"
+          expected: "Bank link retained"
+
+      resume_scenarios:
+        - closed_browser: true
+          resume_url: "{{RESUME_URL}}"
+          expected_stage: "Same stage"
+        - different_app: true
+          attempt_url: "{{DIFFERENT_APP_URL}}"
+          expected: "Access denied"
+
+  TD07:
+    description: "Privacy and access isolation"
+    provisioning_rule: "Independent applicant sessions, approved ADMIN and restricted-role accounts"
+    test_case_ids: ["TP45", "TP46"]
+
+    access_control:
+      applicant_sessions: 2
+      applicant_1_app_id: "{{APP_ID_1}}"
+      applicant_2_app_id: "{{APP_ID_2}}"
+      cross_app_access_attempt: "blocked"
+
+    los_accounts:
+      admin_account:
+        username: "{{LOS_ADMIN_USERNAME}}"
+        password: "{{LOS_ADMIN_PASSWORD}}"
+        role: "ADMIN"
+
+      restricted_account:
+        username: "{{LOS_RESTRICTED_USERNAME}}"
+        password: "{{LOS_RESTRICTED_PASSWORD}}"
+        role: "Viewer"
+
+    data_masking:
+      ssn_format: "XXX-XX-{{LAST_4_SSN}}"
+      otp_visibility: "never_logged"
+      bank_credentials: "redacted_in_logs"
+      email_in_url: "not_exposed"
+
+    redaction_rules:
+      - field: "ssn"
+        masked: true
+      - field: "otp"
+        redacted: true
+      - field: "bank_credentials"
+        redacted: true
+      - field: "password"
+        redacted: true
+
+environment_variables:
+  required:
+    - "QA_EMAIL"
+    - "QA_LOGIN_URL"
+
+  optional:
+    - "QA_NAVIGATION_TIMEOUT_MS"
+    - "QA_BUTTON_PROBE_LIMIT"
+
+  plaid:
+    - "PLAID_SANDBOX_ID"
+    - "PLAID_SANDBOX_CODE"
+    - "PLAID_ACCOUNT_ID"
+
+  los:
+    - "LOS_ADMIN_USERNAME"
+    - "LOS_ADMIN_PASSWORD"
+    - "LOS_RESTRICTED_USERNAME"
+    - "LOS_RESTRICTED_PASSWORD"
+
+approval_checkpoints:
+  - "Q01: Approve field validation rules and boundaries"
+  - "Q02: Approve OTP expiry rules and resend policy"
+  - "Q03: Approve referral source dependencies"
+  - "Q04: Approve address lookup and validation rules"
+  - "Q05: Approve identity and citizenship restrictions"
+  - "Q06: Approve consent and submission idempotency"
+  - "Q07: Approve ECDUP01 error handling"
+  - "Q08: Approve ownership and address logic"
+  - "Q09: Approve multi-purpose amount calculation"
+  - "Q10: Approve income annualization formula"
+  - "Q11: Approve household and employment validation"
+  - "Q12: Approve demographic categories and credit mapping"
+  - "Q13: Approve reference requirements and skip rules"
+  - "Q14: Approve manual statement upload as alternative"
+  - "Q15: Approve Plaid integration and account selection"
+  - "Q16: Reserved"
+  - "Q17: Approve back-navigation and completion tracking"
+  - "Q18: Approve authentication and data isolation"
+  - "Q19: Approve performance SLAs and duplicate prevention"

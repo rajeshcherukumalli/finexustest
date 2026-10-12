@@ -1,0 +1,211 @@
+test_case:
+  id: TP01
+  title: "End-to-End Smoke Test - Complete Loan Application"
+  priority: P1
+  requirement_id:
+    - FR01
+    - FR02
+    - FR03
+    - FR04
+    - FR05
+    - FR06
+    - FR07
+    - FR14
+    - FR15
+    - FR16
+    - FR17
+  test_data_id: TD01
+  basis: Observed
+  description: "Complete application journey with both email verification checkpoints and LOS reconciliation"
+
+test_steps:
+  - step_id: 1
+    action: "Open portal"
+    input: "Use approved portal URL and TD01 data"
+    expected: "Application entry controls and Summary visible"
+    selector: "button:has-text('Next')"
+
+  - step_id: 2
+    action: "Start application"
+    input: "Amount: 25,000, State: Georgia, Email: fresh QA email, Initial agreement: Yes"
+    expected: "First verification modal appears for correct mailbox"
+    selector: "input[name='amount']"
+    data_fields:
+      amount: 25000
+      state: Georgia
+      email: "{{QA_EMAIL}}"
+      initial_agreement: true
+
+  - step_id: 3
+    action: "Verify email (First checkpoint)"
+    input: "Retrieve current six-digit email OTP from {{QA_EMAIL}}, enter code"
+    expected: "Details stage opens; code not visible in evidence"
+    selector: "input[name='otp_code']"
+    data_fields:
+      otp_code: "{{OTP_CODE_1}}"
+
+  - step_id: 4
+    action: "Enter applicant and referral"
+    input: "TD01 names (first/last), language: English, phone: +1-555-XXXX, Community Organization, configured organisation/referrer"
+    expected: "Summary reflects input; Business Details opens"
+    selector: "input[name='first_name']"
+    data_fields:
+      first_name: "{{TD01_FIRST_NAME}}"
+      last_name: "{{TD01_LAST_NAME}}"
+      language: "English"
+      phone: "{{TD01_PHONE}}"
+      referral_source: "Community Organization"
+      organization: "{{QA_ORGANIZATION}}"
+      referrer: "{{QA_REFERRER}}"
+
+  - step_id: 5
+    action: "Enter business details"
+    input: "Legal name, General Partnership, Retail Trade, sub-industry, past start date, approved EIN, address"
+    expected: "All business inputs appear correctly in Summary"
+    selector: "input[name='business_name']"
+    data_fields:
+      business_name: "{{TD01_BUSINESS_NAME}}"
+      business_structure: "General Partnership"
+      industry: "Retail Trade"
+      sub_industry: "{{QA_RETAIL_SUBINDUSTRY}}"
+      start_date: "{{TD01_START_DATE}}"
+      ein: "{{TD01_EIN}}"
+      business_address: "{{TD01_BUSINESS_ADDRESS}}"
+
+  - step_id: 6
+    action: "Enter identity and consent"
+    input: "DOB: {{TD01_DOB}}, SSN: {{TD01_SSN}}, Citizenship: No, home address, accept terms"
+    expected: "Progress indicator shown; Additional Details stage opens"
+    selector: "input[name='dob']"
+    data_fields:
+      dob: "{{TD01_DOB}}"
+      ssn: "{{TD01_SSN}}"
+      citizenship: "No"
+      home_address: "{{TD01_HOME_ADDRESS}}"
+      consent_terms: true
+
+  - step_id: 7
+    action: "Complete additional details"
+    input: "Ownership: 90%, same-address: Yes, contact/preferences, website, profitable: Yes"
+    expected: "Values persist before Next"
+    selector: "input[name='ownership_percent']"
+    data_fields:
+      ownership_percent: 90
+      same_address: true
+      website: "{{TD01_WEBSITE}}"
+      newsletter: true
+      profitable: true
+
+  - step_id: 8
+    action: "Select purpose"
+    input: "Purpose: Renovation, plan description, business description"
+    expected: "Conditional renovation input retained; Income Information stage opens"
+    selector: "select[name='purpose']"
+    data_fields:
+      purpose: "Renovation"
+      renovation_plan: "{{TD01_RENOVATION_PLAN}}"
+      business_description: "{{TD01_BUSINESS_DESCRIPTION}}"
+
+  - step_id: 9
+    action: "Complete income and workforce"
+    input: "Take-home: 80,000, outside income: 15,000, household: 2, under-18: 1, FT: 21, PT: 0, planned FT: 4, Growth: Yes, hours: 48"
+    expected: "Recorded income pair yields annual 1,140,000"
+    selector: "input[name='take_home_income']"
+    data_fields:
+      take_home_income: 80000
+      outside_income: 15000
+      household_size: 2
+      under18_count: 1
+      current_ft_employees: 21
+      current_pt_employees: 0
+      planned_ft_employees: 4
+      planned_pt_employees: 0
+      growth_expected: true
+      growth_hours: 48
+    assertions:
+      annual_income: 1140000
+
+  - step_id: 10
+    action: "Complete demographics"
+    input: "Select 'I choose not to answer'"
+    expected: "References stage opens without mandatory demographic disclosure"
+    selector: "button:has-text('I choose not to answer')"
+    data_fields:
+      demographics: "decline"
+
+  - step_id: 11
+    action: "Complete references"
+    input: "Enter approved personal reference ({{TD01_PERSONAL_REF}}), leave business blank per approved Q13"
+    expected: "No partial-reference errors; bank-link stage opens"
+    selector: "input[name='personal_ref_name']"
+    data_fields:
+      personal_ref_name: "{{TD01_PERSONAL_REF_NAME}}"
+      personal_ref_phone: "{{TD01_PERSONAL_REF_PHONE}}"
+      personal_ref_relationship: "{{TD01_PERSONAL_REF_RELATIONSHIP}}"
+
+  - step_id: 12
+    action: "Connect bank via Plaid"
+    input: "Launch Plaid, use approved sandbox identity {{PLAID_SANDBOX_ID}}, select account, provide consent, finish"
+    expected: "Correct account/link persists; return to application"
+    selector: "button:has-text('Connect Bank')"
+    data_fields:
+      plaid_sandbox_id: "{{PLAID_SANDBOX_ID}}"
+      plaid_sandbox_code: "{{PLAID_SANDBOX_CODE}}"
+      plaid_account: "{{PLAID_ACCOUNT_ID}}"
+
+  - step_id: 13
+    action: "Verify email (Second checkpoint)"
+    input: "Complete second email OTP when shown in demonstrated path, retrieve from {{QA_EMAIL}}"
+    expected: "Final success page appears"
+    selector: "input[name='otp_code_final']"
+    data_fields:
+      otp_code_final: "{{OTP_CODE_2}}"
+
+  - step_id: 14
+    action: "Capture outcome"
+    input: "Record generated application ID, amount, status, business, borrower, purpose"
+    expected: "TD01 outcome: 25,000.00, New Entered, correct names, Renovation purpose"
+    selector: "span[data-testid='application_id']"
+    capture:
+      application_id: true
+      amount: 25000.00
+      status: "New Entered"
+      business_name: "{{TD01_BUSINESS_NAME}}"
+      borrower_name: "{{TD01_FIRST_NAME}} {{TD01_LAST_NAME}}"
+      purpose: "Renovation"
+
+  - step_id: 15
+    action: "Check LOS reconciliation"
+    input: "Sign in with approved ADMIN account to LOS; find generated application ID"
+    expected: "Matching record in Intake with New Entered; values correct; no duplicate"
+    selector: "input[data-testid='los_search_id']"
+    los_verification:
+      status: "New Entered"
+      stage: "Intake"
+      amount: 25000.00
+      purpose: "Renovation"
+      no_duplicates: true
+
+assertions:
+  - "Application successfully created with ID captured"
+  - "Email verification completed at both checkpoints"
+  - "Summary values match final submission"
+  - "LOS record matches portal submission"
+  - "No duplicate records in LOS from retries"
+  - "Generated ID follows approved format"
+  - "Application status is 'New Entered'"
+  - "Application stage is 'Intake' in LOS"
+
+tags:
+  - smoke
+  - critical
+  - full_journey
+  - email_verification
+  - bank_connection
+  - los_reconciliation
+
+exit_criteria:
+  - Generated application ID captured
+  - LOS record found and reconciled
+  - All Summary values match input
+  - No errors during journey

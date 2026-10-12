@@ -1,0 +1,35 @@
+
+Running 3 tests using 1 worker
+
+✓ Page title: "Ascendus Loan Quest"
+✓ Found 2 button(s) on page
+✓ Current URL: https://ascendus-portal-dev.finexusinc.ai/
+✓ Page contains form elements: true
+  ✓  1 [chromium] › tests/specs/smoke.spec.ts:15:7 › TP01: Ascendus Portal Smoke Test › Step 1: Open portal and verify page loads (10.6s)
+✓ Found 28 navigation link(s)
+✓ Headings: 3
+✓ Input fields: 3
+✓ Screenshot saved: smoke-test-portal.png
+  ✓  2 [chromium] › tests/specs/smoke.spec.ts:48:7 › TP01: Ascendus Portal Smoke Test › Step 2: Verify navigation elements (7.5s)
+✓ Error elements found: 1
+  ✘  3 [chromium] › tests/specs/smoke.spec.ts:76:7 › TP01: Ascendus Portal Smoke Test › Step 3: Verify portal is not showing error (4.0s)
+
+
+  1) [chromium] › tests/specs/smoke.spec.ts:76:7 › TP01: Ascendus Portal Smoke Test › Step 3: Verify portal is not showing error › Check for error messages 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/smoke.spec.ts:86:29)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/smoke.spec.ts:83:5)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/smoke-TP01-Ascendus-Portal-21834-portal-is-not-showing-error-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/smoke-TP01-Ascendus-Portal-21834-portal-is-not-showing-error-chromium/error-context.md
+
+  1 failed
+    [chromium] › tests/specs/smoke.spec.ts:76:7 › TP01: Ascendus Portal Smoke Test › Step 3: Verify portal is not showing error 
+  2 passed (26.7s)

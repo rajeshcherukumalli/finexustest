@@ -1,0 +1,213 @@
+
+Running 18 tests using 1 worker
+
+✓ Validation errors shown: Yes
+  ✓   1 [chromium] › tests/specs/application-flow.spec.ts:25:7 › Application Entry & Identity (TP02-TP20) › TP02: Entry validation - mandatory fields required (13.1s)
+ℹ Amount input not found in current state
+ℹ State dropdown not found in current state
+  ✓   2 [chromium] › tests/specs/application-flow.spec.ts:48:7 › Application Entry & Identity (TP02-TP20) › TP03: Amount and state field validation (4.6s)
+✓ Email input field found
+✓ OTP-related elements: 0
+✓ Verification-related text: 0
+  ✓   3 [chromium] › tests/specs/application-flow.spec.ts:82:7 › Application Entry & Identity (TP02-TP20) › TP04: Email verification code requirement (2.3s)
+✓ Input fields on page: 3
+✓ Test value entered: 123
+  ✘   4 [chromium] › tests/specs/application-flow.spec.ts:103:7 › Application Entry & Identity (TP02-TP20) › TP08: Form data persistence across navigation (5.9s)
+  ✘   5 [chromium] › tests/specs/application-flow.spec.ts:129:7 › Application Entry & Identity (TP02-TP20) › TP11: Business details and form sections (7.3s)
+✓ DOB input fields: 0
+✓ SSN input fields: 0
+✓ SSN in URL: OK
+  ✓   6 [chromium] › tests/specs/application-flow.spec.ts:146:7 › Application Entry & Identity (TP02-TP20) › TP16: Identity fields (SSN, DOB) security (2.9s)
+ℹ Consent checkbox not found in current state
+  ✘   7 [chromium] › tests/specs/application-flow.spec.ts:170:7 › Application Entry & Identity (TP02-TP20) › TP18: Terms and consent handling (1.8s)
+ℹ Purpose dropdown not found in current state
+✓ Conditional/description fields: 0
+  ✓   8 [chromium] › tests/specs/business-operations.spec.ts:27:7 › Business Data, References & Operations (TP21-TP48) › TP23: Purpose selection and conditional fields (2.1s)
+✓ Income input fields: 0
+✓ Annual income fields: 0
+✓ Annual income text mentions: 1
+  ✓   9 [chromium] › tests/specs/business-operations.spec.ts:50:7 › Business Data, References & Operations (TP21-TP48) › TP25: Income calculation and annualization (2.2s)
+  ✘  10 [chromium] › tests/specs/business-operations.spec.ts:78:7 › Business Data, References & Operations (TP21-TP48) › TP30: Demographic selection and decline option (2.8s)
+  ✘  11 [chromium] › tests/specs/business-operations.spec.ts:93:7 › Business Data, References & Operations (TP21-TP48) › TP35: Plaid bank connection interface (4.7s)
+  ✘  12 [chromium] › tests/specs/business-operations.spec.ts:111:7 › Business Data, References & Operations (TP21-TP48) › TP41: Confirmation page elements (1.9s)
+  ✘  13 [chromium] › tests/specs/business-operations.spec.ts:129:7 › Business Data, References & Operations (TP21-TP48) › TP42: LOS system integration points (2.6s)
+  ✘  14 [chromium] › tests/specs/business-operations.spec.ts:142:7 › Business Data, References & Operations (TP21-TP48) › TP46: Sensitive data masking (2.5s)
+✓ Focusable elements: 34
+✓ Label elements: 3
+✓ Input fields: 3
+✓ Label-to-input ratio: Good
+✓ ARIA labels: 0
+✓ ARIA descriptions: 0
+✓ ARIA roles: 1
+✓ Heading hierarchy: H1=2, H2=1, H3=0
+✓ Current viewport: 1280x720
+✓ Mobile viewport meta: Yes
+  ✓  15 [chromium] › tests/specs/business-operations.spec.ts:163:7 › Business Data, References & Operations (TP21-TP48) › TP48: Browser compatibility and accessibility (2.6s)
+✓ Page title: "Ascendus Loan Quest"
+✓ Found 2 button(s) on page
+✓ Current URL: https://ascendus-portal-dev.finexusinc.ai/
+✓ Page contains form elements: true
+  ✓  16 [chromium] › tests/specs/smoke.spec.ts:15:7 › TP01: Ascendus Portal Smoke Test › Step 1: Open portal and verify page loads (1.6s)
+✓ Found 28 navigation link(s)
+✓ Headings: 3
+✓ Input fields: 3
+✓ Screenshot saved: smoke-test-portal.png
+  ✓  17 [chromium] › tests/specs/smoke.spec.ts:48:7 › TP01: Ascendus Portal Smoke Test › Step 2: Verify navigation elements (2.5s)
+✓ Error elements found: 1
+  ✘  18 [chromium] › tests/specs/smoke.spec.ts:76:7 › TP01: Ascendus Portal Smoke Test › Step 3: Verify portal is not showing error (2.8s)
+
+
+  1) [chromium] › tests/specs/application-flow.spec.ts:103:7 › Application Entry & Identity (TP02-TP20) › TP08: Form data persistence across navigation › Fill a test field if available 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"[7mTestValue[27m123"[39m
+    Received: [31m"123"[39m
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/application-flow.spec.ts:122:32)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/application-flow.spec.ts:109:5)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/application-flow-Applicati-c4649-rsistence-across-navigation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/application-flow-Applicati-c4649-rsistence-across-navigation-chromium/error-context.md
+
+  2) [chromium] › tests/specs/application-flow.spec.ts:129:7 › Application Entry & Identity (TP02-TP20) › TP11: Business details and form sections › Check for business-related fields 
+
+    Error: locator.count: Unexpected token "/" while parsing css selector "[name*="business"], [placeholder*="business"], label:has-text(/business/i)". Did you mean to CSS.escape it?
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/application-flow.spec.ts:131:127)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/application-flow.spec.ts:130:16)
+
+    Error Context: ../../../../test-results/application-flow-Applicati-02221-s-details-and-form-sections-chromium/error-context.md
+
+  3) [chromium] › tests/specs/application-flow.spec.ts:170:7 › Application Entry & Identity (TP02-TP20) › TP18: Terms and consent handling › Check for terms/policy links 
+
+    Error: locator.count: Unexpected token "/" while parsing css selector "a:has-text(/terms|privacy|policy/i)". Did you mean to CSS.escape it?
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/application-flow.spec.ts:185:85)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/application-flow.spec.ts:184:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/application-flow-Applicati-f0816--Terms-and-consent-handling-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/application-flow-Applicati-f0816--Terms-and-consent-handling-chromium/error-context.md
+
+  4) [chromium] › tests/specs/business-operations.spec.ts:78:7 › Business Data, References & Operations (TP21-TP48) › TP30: Demographic selection and decline option › Check for demographic fields 
+
+    Error: locator.count: Unexpected token "/" while parsing css selector "[name*="demographic"], [aria-label*="demographic"], label:has-text(/demographic/i)". Did you mean to CSS.escape it?
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:80:138)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:79:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/business-operations-Busine-e5f0a-election-and-decline-option-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/business-operations-Busine-e5f0a-election-and-decline-option-chromium/error-context.md
+
+  5) [chromium] › tests/specs/business-operations.spec.ts:93:7 › Business Data, References & Operations (TP21-TP48) › TP35: Plaid bank connection interface › Check for bank connection button 
+
+    Error: locator.isVisible: Unexpected token "/" while parsing css selector "button:has-text(/bank|plaid|connect|link/i)". Did you mean to CSS.escape it?
+    Call log:
+    [2m    - checking visibility of button:has-text(/bank|plaid|connect|link/i) >> nth=0[22m
+
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:97:28)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:94:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/business-operations-Busine-9bc8f-d-bank-connection-interface-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/business-operations-Busine-9bc8f-d-bank-connection-interface-chromium/error-context.md
+
+  6) [chromium] › tests/specs/business-operations.spec.ts:111:7 › Business Data, References & Operations (TP21-TP48) › TP41: Confirmation page elements › Check for success indicators 
+
+    Error: locator.count: SyntaxError: Invalid flags supplied to RegExp constructor 'i, [role="status"][aria-label*="success"]'
+        at new RegExp (<anonymous>)
+        at createTextMatcher (<anonymous>:7998:16)
+        at Object.queryAll (<anonymous>:6874:33)
+        at InjectedScript._queryEngineAll (<anonymous>:6847:49)
+        at InjectedScript.querySelectorAll (<anonymous>:6834:30)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:33)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at createTextMatcher (<anonymous>:7998:16)
+        at Object.queryAll (<anonymous>:6874:33)
+        at InjectedScript._queryEngineAll (<anonymous>:6847:49)
+        at InjectedScript.querySelectorAll (<anonymous>:6834:30)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:33)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:113:145)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:112:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/business-operations-Busine-d9ab5--Confirmation-page-elements-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/business-operations-Busine-d9ab5--Confirmation-page-elements-chromium/error-context.md
+
+  7) [chromium] › tests/specs/business-operations.spec.ts:129:7 › Business Data, References & Operations (TP21-TP48) › TP42: LOS system integration points › Check for LOS links 
+
+    Error: locator.count: Unexpected token "/" while parsing css selector "a:has-text(/los|loan|origination|system/i), a[href*="los"], a[href*="loan"]". Did you mean to CSS.escape it?
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:131:122)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:130:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/business-operations-Busine-f8513-S-system-integration-points-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/business-operations-Busine-f8513-S-system-integration-points-chromium/error-context.md
+
+  8) [chromium] › tests/specs/business-operations.spec.ts:142:7 › Business Data, References & Operations (TP21-TP48) › TP46: Sensitive data masking › Verify SSN masking on page 
+
+    Error: locator.count: SyntaxError: Invalid regular expression: /***-**-d{4}|xxx-xx-d{4}/i: Nothing to repeat
+        at new RegExp (<anonymous>)
+        at createTextMatcher (<anonymous>:7998:16)
+        at Object.queryAll (<anonymous>:6874:33)
+        at InjectedScript._queryEngineAll (<anonymous>:6847:49)
+        at InjectedScript.querySelectorAll (<anonymous>:6834:30)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:33)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at createTextMatcher (<anonymous>:7998:16)
+        at Object.queryAll (<anonymous>:6874:33)
+        at InjectedScript._queryEngineAll (<anonymous>:6847:49)
+        at InjectedScript.querySelectorAll (<anonymous>:6834:30)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:33)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:144:88)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/business-operations.spec.ts:143:16)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/business-operations-Busine-6df57-TP46-Sensitive-data-masking-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/business-operations-Busine-6df57-TP46-Sensitive-data-masking-chromium/error-context.md
+
+  9) [chromium] › tests/specs/smoke.spec.ts:76:7 › TP01: Ascendus Portal Smoke Test › Step 3: Verify portal is not showing error › Check for error messages 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/smoke.spec.ts:86:29)
+        at /home/bhlp0121/Desktop/AI Tool analysis/ai-powered-starter-main (1)/finexustest/tests/specs/smoke.spec.ts:83:5)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../../test-results/smoke-TP01-Ascendus-Portal-21834-portal-is-not-showing-error-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../../test-results/smoke-TP01-Ascendus-Portal-21834-portal-is-not-showing-error-chromium/error-context.md
+
+  9 failed
+    [chromium] › tests/specs/application-flow.spec.ts:103:7 › Application Entry & Identity (TP02-TP20) › TP08: Form data persistence across navigation 
+    [chromium] › tests/specs/application-flow.spec.ts:129:7 › Application Entry & Identity (TP02-TP20) › TP11: Business details and form sections 
+    [chromium] › tests/specs/application-flow.spec.ts:170:7 › Application Entry & Identity (TP02-TP20) › TP18: Terms and consent handling 
+    [chromium] › tests/specs/business-operations.spec.ts:78:7 › Business Data, References & Operations (TP21-TP48) › TP30: Demographic selection and decline option 
+    [chromium] › tests/specs/business-operations.spec.ts:93:7 › Business Data, References & Operations (TP21-TP48) › TP35: Plaid bank connection interface 
+    [chromium] › tests/specs/business-operations.spec.ts:111:7 › Business Data, References & Operations (TP21-TP48) › TP41: Confirmation page elements 
+    [chromium] › tests/specs/business-operations.spec.ts:129:7 › Business Data, References & Operations (TP21-TP48) › TP42: LOS system integration points 
+    [chromium] › tests/specs/business-operations.spec.ts:142:7 › Business Data, References & Operations (TP21-TP48) › TP46: Sensitive data masking 
+    [chromium] › tests/specs/smoke.spec.ts:76:7 › TP01: Ascendus Portal Smoke Test › Step 3: Verify portal is not showing error 
+  9 passed (1.9m)
